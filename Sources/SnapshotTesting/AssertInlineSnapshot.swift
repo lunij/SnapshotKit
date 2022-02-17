@@ -44,7 +44,8 @@ public func _assertInlineSnapshot<Value>(
 
 /// Verifies that a given value matches a string literal.
 ///
-/// Third party snapshot assert helpers can be built on top of this function. Simply invoke `verifyInlineSnapshot` with your own arguments, and then invoke `XCTFail` with the string returned if it is non-`nil`.
+/// Third party snapshot assert helpers can be built on top of this function. Simply invoke `verifyInlineSnapshot` with your own arguments,
+/// and then invoke `XCTFail` with the string returned if it is non-`nil`.
 ///
 /// - Parameters:
 ///   - value: A value to compare against a reference.
@@ -56,7 +57,7 @@ public func _assertInlineSnapshot<Value>(
 ///   - testName: The name of the test in which failure occurred. Defaults to the function name of the test case in which this function was called.
 ///   - line: The line number on which failure occurred. Defaults to the line number on which this function was called.
 /// - Returns: A failure message or, if the value matches, nil.
-public func _verifyInlineSnapshot<Value>(
+public func _verifyInlineSnapshot<Value>( // swiftlint:disable:this cyclomatic_complexity function_body_length
     matching value: @autoclosure () throws -> Value,
     as snapshotting: Snapshotting<Value, String>,
     record recording: Bool = false,
@@ -65,16 +66,14 @@ public func _verifyInlineSnapshot<Value>(
     file: StaticString = #file,
     testName: String = #function,
     line: UInt = #line
-)
-    -> String?
-{
+) -> String? {
     let recording = recording || isRecording
 
     do {
         let tookSnapshot = XCTestExpectation(description: "Took snapshot")
         var optionalDiffable: String?
-        snapshotting.snapshot(try value()).run { b in
-            optionalDiffable = b
+        snapshotting.snapshot(try value()).run {
+            optionalDiffable = $0
             tookSnapshot.fulfill()
         }
         let result = XCTWaiter.wait(for: [tookSnapshot], timeout: timeout)
@@ -187,6 +186,7 @@ internal struct Context {
     }
 }
 
+// swiftlint:disable:next function_body_length
 internal func writeInlineSnapshot(
     _ recordings: inout Recordings,
     _ context: Context
@@ -237,7 +237,7 @@ internal func writeInlineSnapshot(
         let numberSigns: String
         if context.diffable.hasEscapedSpecialCharactersLiteral() {
             numberSigns = String(repeating: "#", count: context.diffable.numberOfNumberSignsNeeded())
-        } else if diffableLines.first(where: { $0.endsInBackslash() }) != nil {
+        } else if diffableLines.contains(where: { $0.endsInBackslash() }) {
             // We want to avoid \ being interpreted as an escaped newline in the recorded inline snapshot
             numberSigns = "#"
         } else {

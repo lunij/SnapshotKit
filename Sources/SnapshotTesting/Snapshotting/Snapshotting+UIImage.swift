@@ -21,25 +21,26 @@ public extension Diffing where Value == UIImage {
         }
 
         return Diffing(
-            toData: { $0.pngData() ?? emptyImage().pngData()! },
-            fromData: { UIImage(data: $0, scale: imageScale)! }
-        ) { old, new in
-            guard !compare(old, new, precision: precision, subpixelThreshold: subpixelThreshold) else { return nil }
-            let difference = SnapshotTesting.diff(old, new)
-            let message = new.size == old.size
-                ? "Newly-taken snapshot does not match reference."
-                : "Newly-taken snapshot@\(new.size) does not match reference@\(old.size)."
-            let oldAttachment = XCTAttachment(image: old)
-            oldAttachment.name = "reference"
-            let newAttachment = XCTAttachment(image: new)
-            newAttachment.name = "failure"
-            let differenceAttachment = XCTAttachment(image: difference)
-            differenceAttachment.name = "difference"
-            return (
-                message,
-                [oldAttachment, newAttachment, differenceAttachment]
-            )
-        }
+            toData: { $0.pngData() ?? emptyImage().pngData()! }, // swiftlint:disable:this force_unwrapping
+            fromData: { UIImage(data: $0, scale: imageScale)! }, // swiftlint:disable:this force_unwrapping
+            diff: { old, new in
+                guard !compare(old, new, precision: precision, subpixelThreshold: subpixelThreshold) else { return nil }
+                let difference = SnapshotTesting.diff(old, new)
+                let message = new.size == old.size
+                    ? "Newly-taken snapshot does not match reference."
+                    : "Newly-taken snapshot@\(new.size) does not match reference@\(old.size)."
+                let oldAttachment = XCTAttachment(image: old)
+                oldAttachment.name = "reference"
+                let newAttachment = XCTAttachment(image: new)
+                newAttachment.name = "failure"
+                let differenceAttachment = XCTAttachment(image: difference)
+                differenceAttachment.name = "difference"
+                return (
+                    message,
+                    [oldAttachment, newAttachment, differenceAttachment]
+                )
+            }
+        )
     }
 
     /// Used when the image size has no width or no height to generated the default empty image
@@ -77,6 +78,7 @@ let imageContextColorSpace = CGColorSpace(name: CGColorSpace.sRGB)
 let imageContextBitsPerComponent = 8
 let imageContextBytesPerPixel = 4
 
+// swiftlint:disable:next cyclomatic_complexity
 private func compare(_ old: UIImage, _ new: UIImage, precision: Float, subpixelThreshold: UInt8) -> Bool {
     guard let oldCgImage = old.cgImage else { return false }
     guard let newCgImage = new.cgImage else { return false }
@@ -94,7 +96,7 @@ private func compare(_ old: UIImage, _ new: UIImage, precision: Float, subpixelT
     if let newContext = context(for: newCgImage), let newData = newContext.data {
         if memcmp(oldData, newData, byteCount) == 0 { return true }
     }
-    let newer = UIImage(data: new.pngData()!)!
+    let newer = UIImage(data: new.pngData()!)! // swiftlint:disable:this force_unwrapping
     guard let newerCgImage = newer.cgImage else { return false }
     var newerBytes = [UInt8](repeating: 0, count: byteCount)
     guard let newerContext = context(for: newerCgImage, data: &newerBytes) else { return false }
@@ -143,7 +145,7 @@ private func diff(_ old: UIImage, _ new: UIImage) -> UIImage {
     UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), true, scale)
     new.draw(at: .zero)
     old.draw(at: .zero, blendMode: .difference, alpha: 1)
-    let differenceImage = UIGraphicsGetImageFromCurrentImageContext()!
+    let differenceImage = UIGraphicsGetImageFromCurrentImageContext()! // swiftlint:disable:this force_unwrapping
     UIGraphicsEndImageContext()
     return differenceImage
 }

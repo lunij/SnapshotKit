@@ -1,0 +1,23 @@
+disabled_rules:
+  - file_length
+  - force_unwrapping
+  - function_body_length
+  - implicitly_unwrapped_optional
+  - type_body_length
+opt_in_rules:
+  - closure_spacing
+  - contains_over_filter_count
+  - contains_over_filter_is_empty
+  - contains_over_first_not_nil
+  - fallthrough
+  - fatal_error_message
+  - file_name
+  - first_where
+  - force_cast
+  - force_try
+  - multiline_arguments
+  - operator_usage_whitespace
+  - overridden_super_call
+force_cast: error
+force_try: error
+function_parameter_count: 4

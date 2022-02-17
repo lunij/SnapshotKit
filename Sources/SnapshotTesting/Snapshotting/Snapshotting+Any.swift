@@ -17,14 +17,14 @@ public extension Snapshotting where Format == String {
         ]
 
         var snapshotting = SimplySnapshotting.lines.pullback { (data: Value) in
-            try! String(decoding: JSONSerialization.data(withJSONObject: data,
-                                                         options: options), as: UTF8.self)
+            try! String(decoding: JSONSerialization.data(withJSONObject: data, options: options), as: UTF8.self) // swiftlint:disable:this force_try
         }
         snapshotting.pathExtension = "json"
         return snapshotting
     }
 }
 
+// swiftlint:disable:next cyclomatic_complexity
 private func snap<T>(_ value: T, name: String? = nil, indent: Int = 0) -> String {
     let indentation = String(repeating: " ", count: indent)
     let mirror = Mirror(reflecting: value)

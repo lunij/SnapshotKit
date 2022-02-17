@@ -6,9 +6,9 @@ public extension Snapshotting where Value: CaseIterable, Format == String {
     /// Returns: A snapshot strategy on functions (Value) -> A that feeds every possible input into the
     ///          function and records the output into a CSV file.
     static func `func`<A>(into witness: Snapshotting<A, Format>) -> Snapshotting<(Value) -> A, Format> {
-        var snapshotting = Snapshotting<String, String>.lines.asyncPullback { (f: (Value) -> A) in
+        var snapshotting = Snapshotting<String, String>.lines.asyncPullback { (function: (Value) -> A) in
             Value.allCases.map { input in
-                witness.snapshot(f(input))
+                witness.snapshot(function(input))
                     .map { (input, $0) }
             }
             .sequence()

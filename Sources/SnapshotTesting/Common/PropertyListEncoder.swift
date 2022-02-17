@@ -1,6 +1,9 @@
 // NB: This file is copied from Swift to make available to Linux Swift 4.2 and below.
 //
 // https://github.com/apple/swift/blob/master/stdlib/public/SDK/Foundation/PlistEncoder.swift
+
+// swiftlint:disable file_length
+
 import Foundation
 
 extension DecodingError {
@@ -10,11 +13,9 @@ extension DecodingError {
     }
 }
 
-let kCFBooleanTrue = NSNumber(booleanLiteral: true)
-let kCFBooleanFalse = NSNumber(booleanLiteral: false)
+let kCFBooleanTrue = NSNumber(true)
+let kCFBooleanFalse = NSNumber(false)
 
-//===----------------------------------------------------------------------===//
-//
 // This source file is part of the Swift.org open source project
 //
 // Copyright (c) 2014 - 2017 Apple Inc. and the Swift project authors
@@ -22,12 +23,6 @@ let kCFBooleanFalse = NSNumber(booleanLiteral: false)
 //
 // See https://swift.org/LICENSE.txt for license information
 // See https://swift.org/CONTRIBUTORS.txt for the list of Swift project authors
-//
-//===----------------------------------------------------------------------===//
-
-//===----------------------------------------------------------------------===//
-// Plist Encoder
-//===----------------------------------------------------------------------===//
 
 /// `PropertyListEncoder` facilitates the encoding of `Encodable` values into property lists.
 open class PropertyListEncoder {
@@ -226,7 +221,7 @@ private struct _PlistEncodingStorage {
 
     fileprivate mutating func popContainer() -> NSObject {
         precondition(!containers.isEmpty, "Empty container stack.")
-        return containers.popLast()!
+        return containers.popLast()! // swiftlint:disable:this force_unwrapping
     }
 }
 
@@ -497,10 +492,10 @@ private extension _PlistEncoder {
     func box_<T: Encodable>(_ value: T) throws -> NSObject? {
         if T.self == Date.self || T.self == NSDate.self {
             // PropertyListSerialization handles NSDate directly.
-            return (value as! NSDate)
+            return value as? NSDate
         } else if T.self == Data.self || T.self == NSData.self {
             // PropertyListSerialization handles NSData directly.
-            return (value as! NSData)
+            return value as? NSData
         }
 
         // The value should request a container from the _PlistEncoder.
@@ -510,7 +505,7 @@ private extension _PlistEncoder {
         } catch {
             // If the value pushed a container before throwing, pop it back off to restore state.
             if storage.count > depth {
-                let _ = storage.popContainer()
+                _ = storage.popContainer()
             }
 
             throw error
@@ -528,7 +523,8 @@ private extension _PlistEncoder {
 // MARK: - _PlistReferencingEncoder
 
 /// _PlistReferencingEncoder is a special subclass of _PlistEncoder which has its own storage, but references the contents of a different encoder.
-/// It's used in superEncoder(), which returns a new encoder for encoding a superclass -- the lifetime of the encoder should not escape the scope it's created in, but it doesn't necessarily know when it's done being used (to write to the original container).
+/// It's used in superEncoder(), which returns a new encoder for encoding a superclass -- the lifetime of the encoder should not escape the scope it's created in,
+/// but it doesn't necessarily know when it's done being used (to write to the original container).
 private class _PlistReferencingEncoder: _PlistEncoder {
     // MARK: Reference types.
 
@@ -599,9 +595,7 @@ private class _PlistReferencingEncoder: _PlistEncoder {
     }
 }
 
-//===----------------------------------------------------------------------===//
 // Plist Decoder
-//===----------------------------------------------------------------------===//
 
 /// `PropertyListDecoder` facilitates the decoding of property list values into semantic `Decodable` types.
 open class PropertyListDecoder {
@@ -762,7 +756,7 @@ private struct _PlistDecodingStorage {
 
     fileprivate var topContainer: Any {
         precondition(!containers.isEmpty, "Empty container stack.")
-        return containers.last!
+        return containers.last! // swiftlint:disable:this force_unwrapping
     }
 
     fileprivate mutating func push(container: __owned Any) {
@@ -1130,12 +1124,15 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     }
 
     public var isAtEnd: Bool {
-        currentIndex >= count!
+        currentIndex >= count! // swiftlint:disable:this force_unwrapping
     }
 
     public mutating func decodeNil() throws -> Bool {
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(Any?.self, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(
+                Any?.self,
+                DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end.")
+            )
         }
 
         if container[currentIndex] is NSNull {
@@ -1148,14 +1145,14 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: Bool.Type) throws -> Bool {
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         decoder.codingPath.append(_PlistKey(index: currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try decoder.unbox(container[currentIndex], as: Bool.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         currentIndex += 1
@@ -1164,14 +1161,14 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: Int.Type) throws -> Int {
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         decoder.codingPath.append(_PlistKey(index: currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try decoder.unbox(container[currentIndex], as: Int.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         currentIndex += 1
@@ -1180,14 +1177,14 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: Int8.Type) throws -> Int8 {
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         decoder.codingPath.append(_PlistKey(index: currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try decoder.unbox(container[currentIndex], as: Int8.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         currentIndex += 1
@@ -1196,14 +1193,14 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: Int16.Type) throws -> Int16 {
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         decoder.codingPath.append(_PlistKey(index: currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try decoder.unbox(container[currentIndex], as: Int16.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         currentIndex += 1
@@ -1212,14 +1209,14 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: Int32.Type) throws -> Int32 {
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         decoder.codingPath.append(_PlistKey(index: currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try decoder.unbox(container[currentIndex], as: Int32.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         currentIndex += 1
@@ -1228,14 +1225,14 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: Int64.Type) throws -> Int64 {
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         decoder.codingPath.append(_PlistKey(index: currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try decoder.unbox(container[currentIndex], as: Int64.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         currentIndex += 1
@@ -1244,14 +1241,14 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: UInt.Type) throws -> UInt {
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         decoder.codingPath.append(_PlistKey(index: currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try decoder.unbox(container[currentIndex], as: UInt.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         currentIndex += 1
@@ -1260,14 +1257,14 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: UInt8.Type) throws -> UInt8 {
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         decoder.codingPath.append(_PlistKey(index: currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try decoder.unbox(container[currentIndex], as: UInt8.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         currentIndex += 1
@@ -1276,14 +1273,14 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: UInt16.Type) throws -> UInt16 {
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         decoder.codingPath.append(_PlistKey(index: currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try decoder.unbox(container[currentIndex], as: UInt16.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         currentIndex += 1
@@ -1292,14 +1289,14 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: UInt32.Type) throws -> UInt32 {
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         decoder.codingPath.append(_PlistKey(index: currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try decoder.unbox(container[currentIndex], as: UInt32.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         currentIndex += 1
@@ -1308,14 +1305,14 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: UInt64.Type) throws -> UInt64 {
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         decoder.codingPath.append(_PlistKey(index: currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try decoder.unbox(container[currentIndex], as: UInt64.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         currentIndex += 1
@@ -1324,14 +1321,14 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: Float.Type) throws -> Float {
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         decoder.codingPath.append(_PlistKey(index: currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try decoder.unbox(container[currentIndex], as: Float.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         currentIndex += 1
@@ -1340,14 +1337,14 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: Double.Type) throws -> Double {
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         decoder.codingPath.append(_PlistKey(index: currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try decoder.unbox(container[currentIndex], as: Double.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         currentIndex += 1
@@ -1356,14 +1353,14 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode(_ type: String.Type) throws -> String {
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         decoder.codingPath.append(_PlistKey(index: currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try decoder.unbox(container[currentIndex], as: String.self) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         currentIndex += 1
@@ -1372,14 +1369,14 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
 
     public mutating func decode<T: Decodable>(_ type: T.Type) throws -> T {
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Unkeyed container is at end."))
         }
 
         decoder.codingPath.append(_PlistKey(index: currentIndex))
         defer { self.decoder.codingPath.removeLast() }
 
         guard let decoded = try decoder.unbox(container[currentIndex], as: type) else {
-            throw DecodingError.valueNotFound(type, DecodingError.Context(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
+            throw DecodingError.valueNotFound(type, .init(codingPath: decoder.codingPath + [_PlistKey(index: currentIndex)], debugDescription: "Expected \(type) but found null instead."))
         }
 
         currentIndex += 1
@@ -1471,77 +1468,77 @@ extension _PlistDecoder: SingleValueDecodingContainer {
 
     public func decode(_: Bool.Type) throws -> Bool {
         try expectNonNull(Bool.self)
-        return try unbox(storage.topContainer, as: Bool.self)!
+        return try unbox(storage.topContainer, as: Bool.self)! // swiftlint:disable:this force_unwrapping
     }
 
     public func decode(_: Int.Type) throws -> Int {
         try expectNonNull(Int.self)
-        return try unbox(storage.topContainer, as: Int.self)!
+        return try unbox(storage.topContainer, as: Int.self)! // swiftlint:disable:this force_unwrapping
     }
 
     public func decode(_: Int8.Type) throws -> Int8 {
         try expectNonNull(Int8.self)
-        return try unbox(storage.topContainer, as: Int8.self)!
+        return try unbox(storage.topContainer, as: Int8.self)! // swiftlint:disable:this force_unwrapping
     }
 
     public func decode(_: Int16.Type) throws -> Int16 {
         try expectNonNull(Int16.self)
-        return try unbox(storage.topContainer, as: Int16.self)!
+        return try unbox(storage.topContainer, as: Int16.self)! // swiftlint:disable:this force_unwrapping
     }
 
     public func decode(_: Int32.Type) throws -> Int32 {
         try expectNonNull(Int32.self)
-        return try unbox(storage.topContainer, as: Int32.self)!
+        return try unbox(storage.topContainer, as: Int32.self)! // swiftlint:disable:this force_unwrapping
     }
 
     public func decode(_: Int64.Type) throws -> Int64 {
         try expectNonNull(Int64.self)
-        return try unbox(storage.topContainer, as: Int64.self)!
+        return try unbox(storage.topContainer, as: Int64.self)! // swiftlint:disable:this force_unwrapping
     }
 
     public func decode(_: UInt.Type) throws -> UInt {
         try expectNonNull(UInt.self)
-        return try unbox(storage.topContainer, as: UInt.self)!
+        return try unbox(storage.topContainer, as: UInt.self)! // swiftlint:disable:this force_unwrapping
     }
 
     public func decode(_: UInt8.Type) throws -> UInt8 {
         try expectNonNull(UInt8.self)
-        return try unbox(storage.topContainer, as: UInt8.self)!
+        return try unbox(storage.topContainer, as: UInt8.self)! // swiftlint:disable:this force_unwrapping
     }
 
     public func decode(_: UInt16.Type) throws -> UInt16 {
         try expectNonNull(UInt16.self)
-        return try unbox(storage.topContainer, as: UInt16.self)!
+        return try unbox(storage.topContainer, as: UInt16.self)! // swiftlint:disable:this force_unwrapping
     }
 
     public func decode(_: UInt32.Type) throws -> UInt32 {
         try expectNonNull(UInt32.self)
-        return try unbox(storage.topContainer, as: UInt32.self)!
+        return try unbox(storage.topContainer, as: UInt32.self)! // swiftlint:disable:this force_unwrapping
     }
 
     public func decode(_: UInt64.Type) throws -> UInt64 {
         try expectNonNull(UInt64.self)
-        return try unbox(storage.topContainer, as: UInt64.self)!
+        return try unbox(storage.topContainer, as: UInt64.self)! // swiftlint:disable:this force_unwrapping
     }
 
     public func decode(_: Float.Type) throws -> Float {
         try expectNonNull(Float.self)
-        return try unbox(storage.topContainer, as: Float.self)!
+        return try unbox(storage.topContainer, as: Float.self)! // swiftlint:disable:this force_unwrapping
     }
 
     public func decode(_: Double.Type) throws -> Double {
         try expectNonNull(Double.self)
-        return try unbox(storage.topContainer, as: Double.self)!
+        return try unbox(storage.topContainer, as: Double.self)! // swiftlint:disable:this force_unwrapping
     }
 
     public func decode(_: String.Type) throws -> String {
         try expectNonNull(String.self)
-        return try unbox(storage.topContainer, as: String.self)!
+        return try unbox(storage.topContainer, as: String.self)! // swiftlint:disable:this force_unwrapping
     }
 
     public func decode<T: Decodable>(_ type: T.Type) throws -> T {
         try expectNonNull(type)
-        return try unbox(storage.topContainer, as: type)!
+        return try unbox(storage.topContainer, as: type)! // swiftlint:disable:this force_unwrapping
     }
 }
 
@@ -1553,17 +1550,11 @@ private extension _PlistDecoder {
         if let string = value as? String, string == _plistNull { return nil }
 
         if let number = value as? NSNumber {
-            // TODO: Add a flag to coerce non-boolean numbers into Bools?
             if number === kCFBooleanTrue as NSNumber {
                 return true
             } else if number === kCFBooleanFalse as NSNumber {
                 return false
             }
-
-            /* FIXME: If swift-corelibs-foundation doesn't change to use NSNumber, this code path will need to be included and tested:
-             } else if let bool = value as? Bool {
-             return bool
-             */
         }
 
         throw DecodingError._typeMismatch(at: codingPath, expectation: type, reality: value)
@@ -1790,17 +1781,13 @@ private extension _PlistDecoder {
     }
 }
 
-//===----------------------------------------------------------------------===//
 // Shared Plist Null Representation
-//===----------------------------------------------------------------------===//
 
 // Since plists do not support null values by default, we will encode them as "$null".
 private let _plistNull = "$null"
 private let _plistNullNSString = NSString(string: _plistNull)
 
-//===----------------------------------------------------------------------===//
 // Shared Key Types
-//===----------------------------------------------------------------------===//
 
 private struct _PlistKey: CodingKey {
     public var stringValue: String
@@ -1821,5 +1808,5 @@ private struct _PlistKey: CodingKey {
         intValue = index
     }
 
-    fileprivate static let `super` = _PlistKey(stringValue: "super")!
+    fileprivate static let `super` = _PlistKey(stringValue: "super")! // swiftlint:disable:this force_unwrapping
 }

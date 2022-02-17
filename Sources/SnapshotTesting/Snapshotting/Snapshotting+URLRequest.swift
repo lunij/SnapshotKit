@@ -45,7 +45,7 @@ public extension Snapshotting where Value == URLRequest, Format == String {
         var components = ["curl"]
 
         // HTTP Method
-        let httpMethod = request.httpMethod!
+        let httpMethod = request.httpMethod! // swiftlint:disable:this force_unwrapping
         switch httpMethod {
         case "GET": break
         case "HEAD": components.append("--head")
@@ -55,7 +55,7 @@ public extension Snapshotting where Value == URLRequest, Format == String {
         // Headers
         if let headers = request.allHTTPHeaderFields {
             for field in headers.keys.sorted() where field != "Cookie" {
-                let escapedValue = headers[field]!.replacingOccurrences(of: "\"", with: "\\\"")
+                let escapedValue = headers[field]!.replacingOccurrences(of: "\"", with: "\\\"") // swiftlint:disable:this force_unwrapping
                 components.append("--header \"\(field): \(escapedValue)\"")
             }
         }
@@ -75,7 +75,7 @@ public extension Snapshotting where Value == URLRequest, Format == String {
         }
 
         // URL
-        components.append("\"\(request.url!.sortingQueryItems()!.absoluteString)\"")
+        components.append("\"\(request.url!.sortingQueryItems()!.absoluteString)\"") // swiftlint:disable:this force_unwrapping
 
         return components.joined(separator: " \\\n\t")
     }

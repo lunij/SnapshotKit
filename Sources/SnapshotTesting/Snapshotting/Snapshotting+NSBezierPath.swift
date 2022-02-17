@@ -70,8 +70,8 @@ public extension Snapshotting where Value == NSBezierPath, Format == String {
                 if let numberOfPoints = numberOfPointsByType[elementType] {
                     let points = elementPoints[0 ..< numberOfPoints]
                     string += " " + points.map { point in
-                        let x = numberFormatter.string(from: point.x as NSNumber)!
-                        let y = numberFormatter.string(from: point.y as NSNumber)!
+                        let x = numberFormatter.string(from: point.x as NSNumber)! // swiftlint:disable:this force_unwrapping
+                        let y = numberFormatter.string(from: point.y as NSNumber)! // swiftlint:disable:this force_unwrapping
                         return "(\(x), \(y))"
                     }.joined(separator: " ")
                 }

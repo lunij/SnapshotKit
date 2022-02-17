@@ -15,11 +15,11 @@ public extension Snapshotting where Value == CGPath, Format == NSImage {
         SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold).pullback { path in
             let bounds = path.boundingBoxOfPath
             var transform = CGAffineTransform(translationX: -bounds.origin.x, y: -bounds.origin.y)
-            let path = path.copy(using: &transform)!
+            let path = path.copy(using: &transform)! // swiftlint:disable:this force_unwrapping
 
             let image = NSImage(size: bounds.size)
             image.lockFocus()
-            let context = NSGraphicsContext.current!.cgContext
+            let context = NSGraphicsContext.current!.cgContext // swiftlint:disable:this force_unwrapping
 
             context.addPath(path)
             context.drawPath(using: drawingMode)
@@ -107,8 +107,8 @@ public extension Snapshotting where Value == CGPath, Format == String {
                 if let numberOfPoints = numberOfPointsByType[element.type] {
                     let points = UnsafeBufferPointer(start: element.points, count: numberOfPoints)
                     string += " " + points.map { point in
-                        let x = numberFormatter.string(from: point.x as NSNumber)!
-                        let y = numberFormatter.string(from: point.y as NSNumber)!
+                        let x = numberFormatter.string(from: point.x as NSNumber)! // swiftlint:disable:this force_unwrapping
+                        let y = numberFormatter.string(from: point.y as NSNumber)! // swiftlint:disable:this force_unwrapping
                         return "(\(x), \(y))"
                     }.joined(separator: " ")
                 }

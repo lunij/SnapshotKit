@@ -22,7 +22,7 @@ public extension Snapshotting where Value == NSView, Format == NSImage {
             }
             return view.snapshot ?? Async { callback in
                 addImagesForRenderedViews(view).sequence().run { views in
-                    let bitmapRep = view.bitmapImageRepForCachingDisplay(in: view.bounds)!
+                    let bitmapRep = view.bitmapImageRepForCachingDisplay(in: view.bounds)! // swiftlint:disable:this force_unwrapping
                     view.cacheDisplay(in: view.bounds, to: bitmapRep)
                     let image = NSImage(size: view.bounds.size)
                     image.addRepresentation(bitmapRep)
@@ -40,8 +40,7 @@ public extension Snapshotting where Value == NSView, Format == String {
     static var recursiveDescription: Snapshotting<NSView, String> {
         SimplySnapshotting.lines.pullback { view in
             purgePointers(
-                view.perform(Selector(("_subtreeDescription"))).retain().takeUnretainedValue()
-                    as! String
+                view.perform(Selector(("_subtreeDescription"))).retain().takeUnretainedValue() as! String // swiftlint:disable:this force_cast
             )
         }
     }

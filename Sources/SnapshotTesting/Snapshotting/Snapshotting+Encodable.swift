@@ -14,7 +14,7 @@ public extension Snapshotting where Value: Encodable, Format == String {
     /// - Parameter encoder: A JSON encoder.
     static func json(_ encoder: JSONEncoder) -> Snapshotting {
         var snapshotting = SimplySnapshotting.lines.pullback { (encodable: Value) in
-            try! String(decoding: encoder.encode(encodable), as: UTF8.self)
+            try! String(decoding: encoder.encode(encodable), as: UTF8.self) // swiftlint:disable:this force_try
         }
         snapshotting.pathExtension = "json"
         return snapshotting
@@ -32,7 +32,7 @@ public extension Snapshotting where Value: Encodable, Format == String {
     /// - Parameter encoder: A property list encoder.
     static func plist(_ encoder: PropertyListEncoder) -> Snapshotting {
         var snapshotting = SimplySnapshotting.lines.pullback { (encodable: Value) in
-            try! String(decoding: encoder.encode(encodable), as: UTF8.self)
+            try! String(decoding: encoder.encode(encodable), as: UTF8.self) // swiftlint:disable:this force_try
         }
         snapshotting.pathExtension = "plist"
         return snapshotting

@@ -88,18 +88,18 @@ final class SnapshotTestingTests: XCTestCase {
 
     func testAutolayout() {
         #if os(iOS)
-        let vc = UIViewController()
-        vc.view.translatesAutoresizingMaskIntoConstraints = false
+        let viewController = UIViewController()
+        viewController.view.translatesAutoresizingMaskIntoConstraints = false
         let subview = UIView()
         subview.translatesAutoresizingMaskIntoConstraints = false
-        vc.view.addSubview(subview)
+        viewController.view.addSubview(subview)
         NSLayoutConstraint.activate([
-            subview.topAnchor.constraint(equalTo: vc.view.topAnchor),
-            subview.bottomAnchor.constraint(equalTo: vc.view.bottomAnchor),
-            subview.leftAnchor.constraint(equalTo: vc.view.leftAnchor),
-            subview.rightAnchor.constraint(equalTo: vc.view.rightAnchor)
+            subview.topAnchor.constraint(equalTo: viewController.view.topAnchor),
+            subview.bottomAnchor.constraint(equalTo: viewController.view.bottomAnchor),
+            subview.leftAnchor.constraint(equalTo: viewController.view.leftAnchor),
+            subview.rightAnchor.constraint(equalTo: viewController.view.rightAnchor)
         ])
-        assertSnapshot(matching: vc, as: .image)
+        assertSnapshot(matching: viewController, as: .image)
         #endif
     }
 
@@ -939,13 +939,17 @@ final class SnapshotTestingTests: XCTestCase {
         assertSnapshot(matching: viewController, as: .image)
         assertSnapshot(matching: viewController, as: .image)
 
-        wait(for: [
-            viewDidLoadExpectation,
-            viewWillAppearExpectation,
-            viewDidAppearExpectation,
-            viewWillDisappearExpectation,
-            viewDidDisappearExpectation
-        ], timeout: 1.0, enforceOrder: true)
+        wait(
+            for: [
+                viewDidLoadExpectation,
+                viewWillAppearExpectation,
+                viewDidAppearExpectation,
+                viewWillDisappearExpectation,
+                viewDidDisappearExpectation
+            ],
+            timeout: 1,
+            enforceOrder: true
+        )
         #endif
     }
 
