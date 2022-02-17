@@ -489,44 +489,41 @@ class InlineSnapshotTests: XCTestCase {
 }
 
 func assertSnapshot(source: String, diffable: String, record: Bool = false, file: StaticString = #file, testName: String = #function, line: UInt = #line) {
-    let indentedDiffable = diffable.split(separator: "\n").map { "    " + $0 }.joined(separator: "\n")
-    let indentedSource = source.split(separator: "\n").map { "    " + $0 }.joined(separator: "\n")
     let decoratedCode = ########"""
     import XCTest
     @testable import SnapshotTesting
     extension InlineSnapshotsValidityTests {
-      func \########(testName) {
-        let diffable = #######"""
-    \########(indentedDiffable)
-        """#######
+        func \########(testName) {
+            let diffable = #######"""
+    \########(diffable.indented(by: 8))
+            """#######
 
-    \########(indentedSource)
-      }
+    \########(source.indented(by: 8))
+        }
     }
+
     """########
     assertSnapshot(matching: decoratedCode, as: .swift, record: record, file: file, testName: testName, line: line)
 }
 
 func assertSnapshot(source: String, diffable: String, diffable2: String, record: Bool = false, file: StaticString = #file, testName: String = #function, line: UInt = #line) {
-    let indentedDiffable = diffable.split(separator: "\n").map { "    " + $0 }.joined(separator: "\n")
-    let indentedDiffable2 = diffable2.split(separator: "\n").map { "    " + $0 }.joined(separator: "\n")
-    let indentedSource = source.split(separator: "\n").map { "    " + $0 }.joined(separator: "\n")
     let decoratedCode = ########"""
     import XCTest
     @testable import SnapshotTesting
     extension InlineSnapshotsValidityTests {
-      func \########(testName) {
-        let diffable = #######"""
-    \########(indentedDiffable)
-        """#######
+        func \########(testName) {
+            let diffable = #######"""
+    \########(diffable.indented(by: 8))
+            """#######
 
-        let diffable2 = #######"""
-    \########(indentedDiffable2)
-        """#######
+            let diffable2 = #######"""
+    \########(diffable2.indented(by: 8))
+            """#######
 
-    \########(indentedSource)
-       }
+    \########(source.indented(by: 8))
+        }
     }
+
     """########
     assertSnapshot(matching: decoratedCode, as: .swift, record: record, file: file, testName: testName, line: line)
 }
@@ -547,3 +544,10 @@ public extension Snapshotting where Value == String, Format == String {
 // the character sequence will be interpreted as " instead of \"
 // The generated tests check this issues.
 class InlineSnapshotsValidityTests: XCTestCase {}
+
+private extension String {
+    func indented(by numberOfSpaces: Int) -> String {
+        let spaces = Array(repeating: " ", count: numberOfSpaces).joined()
+        return split(separator: "\n").map { spaces + $0 }.joined(separator: "\n")
+    }
+}
