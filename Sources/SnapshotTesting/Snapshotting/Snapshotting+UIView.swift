@@ -10,7 +10,8 @@ public extension Snapshotting where Value == UIView, Format == UIImage {
     /// A snapshot strategy for comparing views based on pixel equality.
     ///
     /// - Parameters:
-    ///   - drawHierarchyInKeyWindow: Utilize the simulator's key window in order to render `UIAppearance` and `UIVisualEffect`s. This option requires a host application for your tests and will _not_ work for framework test targets.
+    ///   - drawHierarchyInKeyWindow: Utilize the simulator's key window in order to render `UIAppearance` and `UIVisualEffect`s.
+    ///                               This option requires a host application for your tests and will _not_ work for framework test targets.
     ///   - precision: The percentage of pixels that must match.
     ///   - subpixelThreshold: The byte-value threshold at which two subpixels are considered different.
     ///   - size: A view size override.
@@ -21,9 +22,7 @@ public extension Snapshotting where Value == UIView, Format == UIImage {
         subpixelThreshold: UInt8 = 0,
         size: CGSize? = nil,
         traits: UITraitCollection = .init()
-    )
-        -> Snapshotting
-    {
+    ) -> Snapshotting {
         SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold, scale: traits.displayScale).asyncPullback { view in
             snapshotView(
                 config: .init(safeArea: .zero, size: size ?? view.frame.size, traits: .init()),
@@ -46,9 +45,7 @@ public extension Snapshotting where Value == UIView, Format == String {
     static func recursiveDescription(
         size: CGSize? = nil,
         traits: UITraitCollection = .init()
-    )
-        -> Snapshotting<UIView, String>
-    {
+    ) -> Snapshotting<UIView, String> {
         SimplySnapshotting.lines.pullback { view in
             let dispose = prepareView(
                 config: .init(safeArea: .zero, size: size ?? view.frame.size, traits: traits),
@@ -59,8 +56,7 @@ public extension Snapshotting where Value == UIView, Format == String {
             )
             defer { dispose() }
             return purgePointers(
-                view.perform(Selector(("recursiveDescription"))).retain().takeUnretainedValue()
-                    as! String
+                view.perform(Selector(("recursiveDescription"))).retain().takeUnretainedValue() as! String // swiftlint:disable:this force_cast
             )
         }
     }

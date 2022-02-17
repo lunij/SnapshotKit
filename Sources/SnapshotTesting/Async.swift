@@ -2,7 +2,8 @@
 ///
 /// Snapshot strategies may utilize this type to create snapshots in an asynchronous fashion.
 ///
-/// For example, WebKit's `WKWebView` offers a callback-based API for taking image snapshots (`takeSnapshot`). `Async` allows us to build a value that can pass its callback along to the scope in which the image has been created.
+/// For example, WebKit's `WKWebView` offers a callback-based API for taking image snapshots (`takeSnapshot`).
+/// `Async` allows us to build a value that can pass its callback along to the scope in which the image has been created.
 ///
 ///     Async<UIImage> { callback in
 ///       webView.takeSnapshot(with: nil) { image, error in
@@ -31,9 +32,9 @@ public struct Async<Value> {
     /// Transforms an Async<Value> into an Async<NewValue> with a function `(Value) -> NewValue`.
     ///
     /// - Parameter f: A transformation to apply to the value wrapped by the async value.
-    public func map<NewValue>(_ f: @escaping (Value) -> NewValue) -> Async<NewValue> {
+    public func map<NewValue>(_ function: @escaping (Value) -> NewValue) -> Async<NewValue> {
         .init { callback in
-            self.run { a in callback(f(a)) }
+            self.run { callback(function($0)) }
         }
     }
 }

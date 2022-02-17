@@ -21,9 +21,7 @@ public extension Snapshotting where Value == UIViewController, Format == UIImage
         subpixelThreshold: UInt8 = 0,
         size: CGSize? = nil,
         traits: UITraitCollection = .init()
-    )
-        -> Snapshotting
-    {
+    ) -> Snapshotting {
         SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold, scale: traits.displayScale).asyncPullback { viewController in
             snapshotView(
                 config: size.map { .init(safeArea: config.safeArea, size: $0, traits: config.traits) } ?? config,
@@ -38,7 +36,8 @@ public extension Snapshotting where Value == UIViewController, Format == UIImage
     /// A snapshot strategy for comparing view controller views based on pixel equality.
     ///
     /// - Parameters:
-    ///   - drawHierarchyInKeyWindow: Utilize the simulator's key window in order to render `UIAppearance` and `UIVisualEffect`s. This option requires a host application for your tests and will _not_ work for framework test targets.
+    ///   - drawHierarchyInKeyWindow: Utilize the simulator's key window in order to render `UIAppearance` and `UIVisualEffect`s.
+    ///                               This option requires a host application for your tests and will _not_ work for framework test targets.
     ///   - precision: The percentage of pixels that must match.
     ///   - subpixelThreshold: The byte-value threshold at which two subpixels are considered different.
     ///   - size: A view size override.
@@ -49,9 +48,7 @@ public extension Snapshotting where Value == UIViewController, Format == UIImage
         subpixelThreshold: UInt8 = 0,
         size: CGSize? = nil,
         traits: UITraitCollection = .init()
-    )
-        -> Snapshotting
-    {
+    ) -> Snapshotting {
         SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold, scale: traits.displayScale).asyncPullback { viewController in
             snapshotView(
                 config: .init(safeArea: .zero, size: size, traits: traits),
@@ -77,7 +74,7 @@ public extension Snapshotting where Value == UIViewController, Format == String 
             )
             defer { dispose() }
             return purgePointers(
-                viewController.perform(Selector(("_printHierarchy"))).retain().takeUnretainedValue() as! String
+                viewController.perform(Selector(("_printHierarchy"))).retain().takeUnretainedValue() as! String // swiftlint:disable:this force_cast
             )
         }
     }
@@ -97,9 +94,7 @@ public extension Snapshotting where Value == UIViewController, Format == String 
         on config: ViewImageConfig = .init(),
         size: CGSize? = nil,
         traits: UITraitCollection = .init()
-    )
-        -> Snapshotting<UIViewController, String>
-    {
+    ) -> Snapshotting<UIViewController, String> {
         SimplySnapshotting.lines.pullback { viewController in
             let dispose = prepareView(
                 config: .init(safeArea: config.safeArea, size: size ?? config.size, traits: config.traits),
@@ -110,8 +105,7 @@ public extension Snapshotting where Value == UIViewController, Format == String 
             )
             defer { dispose() }
             return purgePointers(
-                viewController.view.perform(Selector(("recursiveDescription"))).retain().takeUnretainedValue()
-                    as! String
+                viewController.view.perform(Selector(("recursiveDescription"))).retain().takeUnretainedValue() as! String // swiftlint:disable:this force_cast
             )
         }
     }

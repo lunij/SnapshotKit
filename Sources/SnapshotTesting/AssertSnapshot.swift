@@ -118,7 +118,9 @@ public func assertSnapshots<Value, Format>(
 
 /// Verifies that a given value matches a reference on disk.
 ///
-/// Third party snapshot assert helpers can be built on top of this function. Simply invoke `verifySnapshot` with your own arguments, and then invoke `XCTFail` with the string returned if it is non-`nil`. For example, if you want the snapshot directory to be determined by an environment variable, you can create your own assert helper like so:
+/// Third party snapshot assert helpers can be built on top of this function.
+/// Simply invoke `verifySnapshot` with your own arguments, and then invoke `XCTFail` with the string returned if it is non-`nil`.
+/// For example, if you want the snapshot directory to be determined by an environment variable, you can create your own assert helper like so:
 ///
 ///     public func myAssertSnapshot<Value, Format>(
 ///       matching value: @autoclosure () throws -> Value,
@@ -151,13 +153,14 @@ public func assertSnapshots<Value, Format>(
 ///   - snapshotting: A strategy for serializing, deserializing, and comparing values.
 ///   - name: An optional description of the snapshot.
 ///   - recording: Whether or not to record a new reference.
-///   - snapshotDirectory: Optional directory to save snapshots. By default snapshots will be saved in a directory with the same name as the test file, and that directory will sit inside a directory `__Snapshots__` that sits next to your test file.
+///   - snapshotDirectory: Optional directory to save snapshots. By default snapshots will be saved in a directory with the same name as the test file,
+///                        and that directory will sit inside a directory `__Snapshots__` that sits next to your test file.
 ///   - timeout: The amount of time a snapshot must be generated in.
 ///   - file: The file in which failure occurred. Defaults to the file name of the test case in which this function was called.
 ///   - testName: The name of the test in which failure occurred. Defaults to the function name of the test case in which this function was called.
 ///   - line: The line number on which failure occurred. Defaults to the line number on which this function was called.
 /// - Returns: A failure message or, if the value matches, nil.
-public func verifySnapshot<Value, Format>(
+public func verifySnapshot<Value, Format>( // swiftlint:disable:this cyclomatic_complexity function_body_length
     matching value: @autoclosure () throws -> Value,
     as snapshotting: Snapshotting<Value, Format>,
     named name: String? = nil,
@@ -167,9 +170,7 @@ public func verifySnapshot<Value, Format>(
     file: StaticString = #file,
     testName: String = #function,
     line _: UInt = #line
-)
-    -> String?
-{
+) -> String? {
     let recording = recording || isRecording
 
     do {
@@ -189,7 +190,7 @@ public func verifySnapshot<Value, Format>(
             let counter = counterQueue.sync { () -> Int in
                 let key = snapshotDirectoryUrl.appendingPathComponent(testName)
                 counterMap[key, default: 0] += 1
-                return counterMap[key]!
+                return counterMap[key]! // swiftlint:disable:this force_unwrapping
             }
             identifier = String(counter)
         }
@@ -203,8 +204,8 @@ public func verifySnapshot<Value, Format>(
 
         let tookSnapshot = XCTestExpectation(description: "Took snapshot")
         var optionalDiffable: Format?
-        snapshotting.snapshot(try value()).run { b in
-            optionalDiffable = b
+        snapshotting.snapshot(try value()).run {
+            optionalDiffable = $0
             tookSnapshot.fulfill()
         }
         let result = XCTWaiter.wait(for: [tookSnapshot], timeout: timeout)

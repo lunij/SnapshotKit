@@ -1,0 +1,42 @@
+opt_in_rules:
+  - closure_spacing
+  - contains_over_filter_count
+  - contains_over_filter_is_empty
+  - contains_over_first_not_nil
+  - fallthrough
+  - fatal_error_message
+  - file_name
+  - first_where
+  - force_cast
+  - force_try
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - multiline_arguments
+  - operator_usage_whitespace
+  - overridden_super_call
+  # - type_contents_order
+excluded:
+  - .build
+  - .derivedData
+  - ./Tests/SnapshotTestingTests/__Snapshots__
+  - DerivedData
+file_name:
+  excluded:
+    - AssertInlineSnapshot.swift
+    - Project.swift
+force_cast: error
+force_try: error
+function_parameter_count: 5
+identifier_name:
+  allowed_symbols: _
+  excluded:
+    - id
+    - tv
+    - up
+    - x
+    - y
+line_length: 200
+nesting:
+  type_level:
+    warning: 2
+    error: 4
