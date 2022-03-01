@@ -43,7 +43,7 @@ final class SnapshotTestingTests: XCTestCase {
         """)
     }
 
-    @available(macOS 10.13, *)
+    @available(macOS 10.13, tvOS 11.0, *)
     func testAnyAsJson() throws {
         struct User: Encodable { let id: Int, name: String, bio: String }
         let user = User(id: 1, name: "Blobby", bio: "Blobbed around the world.")
@@ -163,9 +163,7 @@ final class SnapshotTestingTests: XCTestCase {
         osName = "macOS"
         #endif
 
-        if !ProcessInfo.processInfo.environment.keys.contains("GITHUB_WORKFLOW") {
-            assertSnapshot(matching: path, as: .image, named: osName)
-        }
+        assertSnapshot(matching: path, as: .image, named: osName)
 
         if #available(iOS 11.0, OSX 10.13, tvOS 11.0, *) {
             assertSnapshot(matching: path, as: .elementsDescription, named: osName)
@@ -228,10 +226,7 @@ final class SnapshotTestingTests: XCTestCase {
         #if os(macOS)
         let path = NSBezierPath.heart
 
-        if !ProcessInfo.processInfo.environment.keys.contains("GITHUB_WORKFLOW") {
-            assertSnapshot(matching: path, as: .image, named: "macOS")
-        }
-
+        assertSnapshot(matching: path, as: .image, named: "macOS")
         assertSnapshot(matching: path, as: .elementsDescription, named: "macOS")
         #endif
     }
@@ -239,27 +234,26 @@ final class SnapshotTestingTests: XCTestCase {
     func testNSView() {
         #if os(macOS)
         let button = NSButton()
+        button.appearance = NSAppearance(named: .aqua)
         button.bezelStyle = .rounded
         button.title = "Push Me"
         button.sizeToFit()
-        if !ProcessInfo.processInfo.environment.keys.contains("GITHUB_WORKFLOW") {
-            assertSnapshot(matching: button, as: .image)
-            assertSnapshot(matching: button, as: .recursiveDescription)
-        }
+
+        assertSnapshot(matching: button, as: .image)
+        assertSnapshot(matching: button, as: .recursiveDescription)
         #endif
     }
 
     func testNSViewWithLayer() {
         #if os(macOS)
         let view = NSView()
-        view.frame = CGRect(x: 0.0, y: 0.0, width: 10.0, height: 10.0)
+        view.frame = CGRect(origin: .zero, size: .init(width: 10, height: 10))
         view.wantsLayer = true
         view.layer?.backgroundColor = NSColor.green.cgColor
         view.layer?.cornerRadius = 5
-        if !ProcessInfo.processInfo.environment.keys.contains("GITHUB_WORKFLOW") {
-            assertSnapshot(matching: view, as: .image)
-            assertSnapshot(matching: view, as: .recursiveDescription)
-        }
+
+        assertSnapshot(matching: view, as: .image)
+        assertSnapshot(matching: view, as: .recursiveDescription)
         #endif
     }
 
@@ -277,15 +271,15 @@ final class SnapshotTestingTests: XCTestCase {
         let label = NSTextField()
         label.frame = CGRect(origin: .zero, size: CGSize(width: 37, height: 16))
         label.backgroundColor = .white
+        label.textColor = .black
         label.isBezeled = false
         label.isEditable = false
         #endif
-        if !ProcessInfo.processInfo.environment.keys.contains("GITHUB_WORKFLOW") {
-            label.text = "Hello."
-            assertSnapshot(matching: label, as: .image(precision: 0.9), named: platform)
-            label.text = "Hello"
-            assertSnapshot(matching: label, as: .image(precision: 0.9), named: platform)
-        }
+
+        label.text = "Hello."
+        assertSnapshot(matching: label, as: .image(precision: 0.9), named: platform)
+        label.text = "Hello"
+        assertSnapshot(matching: label, as: .image(precision: 0.9), named: platform)
         #endif
     }
 
@@ -1058,13 +1052,12 @@ final class SnapshotTestingTests: XCTestCase {
         let html = try String(contentsOf: fixtureUrl)
         let webView = WKWebView()
         webView.loadHTMLString(html, baseURL: nil)
-        if !ProcessInfo.processInfo.environment.keys.contains("GITHUB_WORKFLOW") {
-            assertSnapshot(
-                matching: webView,
-                as: .image(size: .init(width: 800, height: 600)),
-                named: platform
-            )
-        }
+
+        assertSnapshot(
+            matching: webView,
+            as: .image(size: .init(width: 800, height: 600)),
+            named: platform
+        )
         #endif
     }
 
@@ -1130,33 +1123,15 @@ final class SnapshotTestingTests: XCTestCase {
             .appendingPathComponent("__Fixtures__/pointfree.html")
         let html = try String(contentsOf: fixtureUrl)
         webView.loadHTMLString(html, baseURL: nil)
-        if !ProcessInfo.processInfo.environment.keys.contains("GITHUB_WORKFLOW") {
-            assertSnapshot(
-                matching: webView,
-                as: .image(size: .init(width: 800, height: 600)),
-                named: platform
-            )
-        }
+
+        assertSnapshot(
+            matching: webView,
+            as: .image(size: .init(width: 800, height: 600)),
+            named: platform
+        )
+
         _ = manipulatingWKWebViewNavigationDelegate
     }
-
-    #if os(iOS) || os(macOS)
-    func testWebViewWithRealUrl() throws {
-        let manipulatingWKWebViewNavigationDelegate = ManipulatingWKWebViewNavigationDelegate()
-        let webView = WKWebView()
-        webView.navigationDelegate = manipulatingWKWebViewNavigationDelegate
-
-        webView.load(URLRequest(url: URL(string: "https://www.pointfree.co")!))
-        if !ProcessInfo.processInfo.environment.keys.contains("GITHUB_WORKFLOW") {
-            assertSnapshot(
-                matching: webView,
-                as: .image(size: .init(width: 800, height: 600)),
-                named: platform
-            )
-        }
-        _ = manipulatingWKWebViewNavigationDelegate
-    }
-    #endif
 
     final class CancellingWKWebViewNavigationDelegate: NSObject, WKNavigationDelegate {
         func webView(
@@ -1178,13 +1153,13 @@ final class SnapshotTestingTests: XCTestCase {
             .appendingPathComponent("__Fixtures__/pointfree.html")
         let html = try String(contentsOf: fixtureUrl)
         webView.loadHTMLString(html, baseURL: nil)
-        if !ProcessInfo.processInfo.environment.keys.contains("GITHUB_WORKFLOW") {
-            assertSnapshot(
-                matching: webView,
-                as: .image(size: .init(width: 800, height: 600)),
-                named: platform
-            )
-        }
+
+        assertSnapshot(
+            matching: webView,
+            as: .image(size: .init(width: 800, height: 600)),
+            named: platform
+        )
+
         _ = cancellingWKWebViewNavigationDelegate
     }
     #endif
