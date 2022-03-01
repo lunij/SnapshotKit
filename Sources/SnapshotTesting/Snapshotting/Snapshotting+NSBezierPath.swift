@@ -88,6 +88,7 @@ private let defaultNumberFormatter: NumberFormatter = {
     let numberFormatter = NumberFormatter()
     numberFormatter.minimumFractionDigits = 1
     numberFormatter.maximumFractionDigits = 3
+    numberFormatter.locale = Locale(identifier: "en_US_POSIX")
     return numberFormatter
 }()
 #endif
