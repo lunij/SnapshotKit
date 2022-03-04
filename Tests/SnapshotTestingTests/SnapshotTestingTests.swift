@@ -1210,15 +1210,6 @@ final class SnapshotTestingTests: XCTestCase {
         assertSnapshot(matching: view, as: .image(layout: .device(config: .tv)), named: "device")
         #endif
     }
-
-    @available(*, deprecated)
-    func testIsRecordingProxy() {
-        SnapshotTesting.record = true
-        XCTAssertEqual(isRecording, true)
-
-        SnapshotTesting.record = false
-        XCTAssertEqual(isRecording, false)
-    }
 }
 
 #if os(iOS)
