@@ -61,24 +61,38 @@ open class PropertyListEncoder {
     open func encode<Value: Encodable>(_ value: Value) throws -> Data {
         let topLevel = try encodeToTopLevelContainer(value)
         if topLevel is NSNumber {
-            throw EncodingError.invalidValue(value,
-                                             EncodingError.Context(codingPath: [],
-                                                                   debugDescription: "Top-level \(Value.self) encoded as number property list fragment."))
+            throw EncodingError.invalidValue(
+                value,
+                EncodingError.Context(
+                    codingPath: [],
+                    debugDescription: "Top-level \(Value.self) encoded as number property list fragment."
+                )
+            )
         } else if topLevel is NSString {
-            throw EncodingError.invalidValue(value,
-                                             EncodingError.Context(codingPath: [],
-                                                                   debugDescription: "Top-level \(Value.self) encoded as string property list fragment."))
+            throw EncodingError.invalidValue(
+                value,
+                EncodingError.Context(
+                    codingPath: [],
+                    debugDescription: "Top-level \(Value.self) encoded as string property list fragment."
+                )
+            )
         } else if topLevel is NSDate {
-            throw EncodingError.invalidValue(value,
-                                             EncodingError.Context(codingPath: [],
-                                                                   debugDescription: "Top-level \(Value.self) encoded as date property list fragment."))
+            throw EncodingError.invalidValue(
+                value,
+                EncodingError.Context(
+                    codingPath: [],
+                    debugDescription: "Top-level \(Value.self) encoded as date property list fragment."
+                )
+            )
         }
 
         do {
             return try PropertyListSerialization.data(fromPropertyList: topLevel, format: outputFormat, options: 0)
         } catch {
-            throw EncodingError.invalidValue(value,
-                                             EncodingError.Context(codingPath: [], debugDescription: "Unable to encode the given top-level value as a property list", underlyingError: error))
+            throw EncodingError.invalidValue(
+                value,
+                EncodingError.Context(codingPath: [], debugDescription: "Unable to encode the given top-level value as a property list", underlyingError: error)
+            )
         }
     }
 
@@ -91,9 +105,13 @@ open class PropertyListEncoder {
     internal func encodeToTopLevelContainer<Value: Encodable>(_ value: Value) throws -> Any {
         let encoder = _PlistEncoder(options: options)
         guard let topLevel = try encoder.box_(value) else {
-            throw EncodingError.invalidValue(value,
-                                             EncodingError.Context(codingPath: [],
-                                                                   debugDescription: "Top-level \(Value.self) did not encode any values."))
+            throw EncodingError.invalidValue(
+                value,
+                EncodingError.Context(
+                    codingPath: [],
+                    debugDescription: "Top-level \(Value.self) did not encode any values."
+                )
+            )
         }
 
         return topLevel
@@ -702,9 +720,13 @@ private class _PlistDecoder: Decoder {
 
     public func container<Key>(keyedBy _: Key.Type) throws -> KeyedDecodingContainer<Key> {
         guard !(storage.topContainer is NSNull) else {
-            throw DecodingError.valueNotFound(KeyedDecodingContainer<Key>.self,
-                                              DecodingError.Context(codingPath: codingPath,
-                                                                    debugDescription: "Cannot get keyed decoding container -- found null value instead."))
+            throw DecodingError.valueNotFound(
+                KeyedDecodingContainer<Key>.self,
+                DecodingError.Context(
+                    codingPath: codingPath,
+                    debugDescription: "Cannot get keyed decoding container -- found null value instead."
+                )
+            )
         }
 
         guard let topContainer = storage.topContainer as? [String: Any] else {
@@ -717,9 +739,13 @@ private class _PlistDecoder: Decoder {
 
     public func unkeyedContainer() throws -> UnkeyedDecodingContainer {
         guard !(storage.topContainer is NSNull) else {
-            throw DecodingError.valueNotFound(UnkeyedDecodingContainer.self,
-                                              DecodingError.Context(codingPath: codingPath,
-                                                                    debugDescription: "Cannot get unkeyed decoding container -- found null value instead."))
+            throw DecodingError.valueNotFound(
+                UnkeyedDecodingContainer.self,
+                DecodingError.Context(
+                    codingPath: codingPath,
+                    debugDescription: "Cannot get unkeyed decoding container -- found null value instead."
+                )
+            )
         }
 
         guard let topContainer = storage.topContainer as? [Any] else {
@@ -1045,9 +1071,13 @@ private struct _PlistKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContaine
         defer { self.decoder.codingPath.removeLast() }
 
         guard let value = container[key.stringValue] else {
-            throw DecodingError.valueNotFound(KeyedDecodingContainer<NestedKey>.self,
-                                              DecodingError.Context(codingPath: codingPath,
-                                                                    debugDescription: "Cannot get nested keyed container -- no value found for key \"\(key.stringValue)\""))
+            throw DecodingError.valueNotFound(
+                KeyedDecodingContainer<NestedKey>.self,
+                DecodingError.Context(
+                    codingPath: codingPath,
+                    debugDescription: "Cannot get nested keyed container -- no value found for key \"\(key.stringValue)\""
+                )
+            )
         }
 
         guard let dictionary = value as? [String: Any] else {
@@ -1063,9 +1093,13 @@ private struct _PlistKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContaine
         defer { self.decoder.codingPath.removeLast() }
 
         guard let value = container[key.stringValue] else {
-            throw DecodingError.valueNotFound(UnkeyedDecodingContainer.self,
-                                              DecodingError.Context(codingPath: codingPath,
-                                                                    debugDescription: "Cannot get nested unkeyed container -- no value found for key \"\(key.stringValue)\""))
+            throw DecodingError.valueNotFound(
+                UnkeyedDecodingContainer.self,
+                DecodingError.Context(
+                    codingPath: codingPath,
+                    debugDescription: "Cannot get nested unkeyed container -- no value found for key \"\(key.stringValue)\""
+                )
+            )
         }
 
         guard let array = value as? [Any] else {
@@ -1388,16 +1422,24 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         defer { self.decoder.codingPath.removeLast() }
 
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(KeyedDecodingContainer<NestedKey>.self,
-                                              DecodingError.Context(codingPath: codingPath,
-                                                                    debugDescription: "Cannot get nested keyed container -- unkeyed container is at end."))
+            throw DecodingError.valueNotFound(
+                KeyedDecodingContainer<NestedKey>.self,
+                DecodingError.Context(
+                    codingPath: codingPath,
+                    debugDescription: "Cannot get nested keyed container -- unkeyed container is at end."
+                )
+            )
         }
 
         let value = container[currentIndex]
         guard !(value is NSNull) else {
-            throw DecodingError.valueNotFound(KeyedDecodingContainer<NestedKey>.self,
-                                              DecodingError.Context(codingPath: codingPath,
-                                                                    debugDescription: "Cannot get keyed decoding container -- found null value instead."))
+            throw DecodingError.valueNotFound(
+                KeyedDecodingContainer<NestedKey>.self,
+                DecodingError.Context(
+                    codingPath: codingPath,
+                    debugDescription: "Cannot get keyed decoding container -- found null value instead."
+                )
+            )
         }
 
         guard let dictionary = value as? [String: Any] else {
@@ -1414,16 +1456,24 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         defer { self.decoder.codingPath.removeLast() }
 
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(UnkeyedDecodingContainer.self,
-                                              DecodingError.Context(codingPath: codingPath,
-                                                                    debugDescription: "Cannot get nested unkeyed container -- unkeyed container is at end."))
+            throw DecodingError.valueNotFound(
+                UnkeyedDecodingContainer.self,
+                DecodingError.Context(
+                    codingPath: codingPath,
+                    debugDescription: "Cannot get nested unkeyed container -- unkeyed container is at end."
+                )
+            )
         }
 
         let value = container[currentIndex]
         guard !(value is NSNull) else {
-            throw DecodingError.valueNotFound(UnkeyedDecodingContainer.self,
-                                              DecodingError.Context(codingPath: codingPath,
-                                                                    debugDescription: "Cannot get keyed decoding container -- found null value instead."))
+            throw DecodingError.valueNotFound(
+                UnkeyedDecodingContainer.self,
+                DecodingError.Context(
+                    codingPath: codingPath,
+                    debugDescription: "Cannot get keyed decoding container -- found null value instead."
+                )
+            )
         }
 
         guard let array = value as? [Any] else {
@@ -1439,8 +1489,10 @@ private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
         defer { self.decoder.codingPath.removeLast() }
 
         guard !isAtEnd else {
-            throw DecodingError.valueNotFound(Decoder.self, DecodingError.Context(codingPath: codingPath,
-                                                                                  debugDescription: "Cannot get superDecoder() -- unkeyed container is at end."))
+            throw DecodingError.valueNotFound(Decoder.self, DecodingError.Context(
+                codingPath: codingPath,
+                debugDescription: "Cannot get superDecoder() -- unkeyed container is at end."
+            ))
         }
 
         let value = container[currentIndex]
