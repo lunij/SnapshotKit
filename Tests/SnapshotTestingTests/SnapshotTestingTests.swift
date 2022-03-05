@@ -165,7 +165,7 @@ final class SnapshotTestingTests: XCTestCase {
 
         assertSnapshot(matching: path, as: .image, named: osName)
 
-        if #available(iOS 11.0, OSX 10.13, tvOS 11.0, *) {
+        if #available(iOS 11.0, macOS 10.13, tvOS 11.0, *) {
             assertSnapshot(matching: path, as: .elementsDescription, named: osName)
         }
     }

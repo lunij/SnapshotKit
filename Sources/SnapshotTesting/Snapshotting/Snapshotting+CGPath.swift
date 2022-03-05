@@ -64,7 +64,7 @@ public extension Snapshotting where Value == CGPath, Format == UIImage {
 #endif
 
 #if os(macOS) || os(iOS) || os(tvOS)
-@available(iOS 11.0, OSX 10.13, tvOS 11.0, *)
+@available(iOS 11.0, macOS 10.13, tvOS 11.0, *)
 public extension Snapshotting where Value == CGPath, Format == String {
     /// A snapshot strategy for comparing bezier paths based on element descriptions.
     static var elementsDescription: Snapshotting {
