@@ -1199,30 +1199,3 @@ private let allContentSizes =
         "accessibility-extra-extra-extra-large": .accessibilityExtraExtraExtraLarge
     ]
 #endif
-
-#if os(Linux) || os(Windows)
-extension SnapshotTestingTests {
-    static var allTests: [(String, (SnapshotTestingTests) -> () throws -> Void)] {
-        [
-            ("testAny", testAny),
-            ("testAnySnapshotStringConvertible", testAnySnapshotStringConvertible),
-            ("testAutolayout", testAutolayout),
-            ("testDeterministicDictionaryAndSetSnapshots", testDeterministicDictionaryAndSetSnapshots),
-            ("testEncodable", testEncodable),
-            ("testMixedViews", testMixedViews),
-            ("testMultipleSnapshots", testMultipleSnapshots),
-            ("testNamedAssertion", testNamedAssertion),
-            ("testPrecision", testPrecision),
-            ("testSCNView", testSCNView),
-            ("testSKView", testSKView),
-            ("testTableViewController", testTableViewController),
-            ("testTraits", testTraits),
-            ("testTraitsEmbeddedInTabNavigation", testTraitsEmbeddedInTabNavigation),
-            ("testTraitsWithView", testTraitsWithView),
-            ("testUIView", testUIView),
-            ("testURLRequest", testURLRequest),
-            ("testWebView", testWebView)
-        ]
-    }
-}
-#endif
