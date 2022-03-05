@@ -14,7 +14,7 @@ jobs:
       matrix:
         xcode:
           - "12.5.1" # Swift 5.4
-          - "13.0"   # Swift 5.5
+          - "13.2.1" # Swift 5.5
 
     name: macOS 11, Xcode ${{ matrix.xcode }}
     runs-on: macos-11
