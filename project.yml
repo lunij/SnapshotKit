@@ -14,7 +14,7 @@ targets:
     settings:
       ENABLE_BITCODE: false
       FRAMEWORK_SEARCH_PATHS: $(inherited) $(PLATFORM_DIR)/Developer/Library/Frameworks
-      SWIFT_VERSION: 5.0
+      SWIFT_VERSION: 5.4
       APPLICATION_EXTENSION_API_ONLY: 'YES'
       ENABLE_TESTING_SEARCH_PATHS: 'YES'
     scheme:
@@ -27,7 +27,7 @@ targets:
     dependencies: [{target: 'SnapshotTesting_${platform}'}]
     platform: [macOS, iOS, tvOS]
     settings:
-      SWIFT_VERSION: 5.0
+      SWIFT_VERSION: 5.4
       APPLICATION_EXTENSION_API_ONLY: 'YES'
     sources:
       - path: Tests

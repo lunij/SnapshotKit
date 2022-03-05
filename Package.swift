@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.4
 import Foundation
 import PackageDescription
 
@@ -22,7 +22,11 @@ let package = Package(
         ),
         .testTarget(
             name: "SnapshotTestingTests",
-            dependencies: ["SnapshotTesting"]
+            dependencies: ["SnapshotTesting"],
+            exclude: [
+                "__Fixtures__",
+                "__Snapshots__"
+            ]
         )
     ]
 )
