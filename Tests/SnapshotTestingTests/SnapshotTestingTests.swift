@@ -190,7 +190,6 @@ final class SnapshotTestingTests: XCTestCase {
     func testMixedViews() {
 //    #if os(iOS) || os(macOS)
 //    // NB: CircleCI crashes while trying to instantiate SKView.
-//    if !ProcessInfo.processInfo.environment.keys.contains("GITHUB_WORKFLOW") {
 //      let webView = WKWebView(frame: .init(x: 0, y: 0, width: 50, height: 50))
 //      webView.loadHTMLString("🌎", baseURL: nil)
 //
@@ -207,7 +206,6 @@ final class SnapshotTestingTests: XCTestCase {
 //      view.addSubview(skView)
 //
 //      assertSnapshot(matching: view, as: .image, named: platform)
-//    }
 //    #endif
     }
 
@@ -286,7 +284,6 @@ final class SnapshotTestingTests: XCTestCase {
     func testSCNView() {
 //    #if os(iOS) || os(macOS) || os(tvOS)
 //    // NB: CircleCI crashes while trying to instantiate SCNView.
-//    if !ProcessInfo.processInfo.environment.keys.contains("GITHUB_WORKFLOW") {
 //      let scene = SCNScene()
 //
 //      let sphereGeometry = SCNSphere(radius: 3)
@@ -316,14 +313,12 @@ final class SnapshotTestingTests: XCTestCase {
 //        as: .image(size: .init(width: 500, height: 500)),
 //        named: platform
 //      )
-//    }
 //    #endif
     }
 
     func testSKView() {
 //    #if os(iOS) || os(macOS) || os(tvOS)
 //    // NB: CircleCI crashes while trying to instantiate SKView.
-//    if !ProcessInfo.processInfo.environment.keys.contains("GITHUB_WORKFLOW") {
 //      let scene = SKScene(size: .init(width: 50, height: 50))
 //      let node = SKShapeNode(circleOfRadius: 15)
 //      node.fillColor = .red
@@ -335,7 +330,6 @@ final class SnapshotTestingTests: XCTestCase {
 //        as: .image(size: .init(width: 50, height: 50)),
 //        named: platform
 //      )
-//    }
 //    #endif
     }
 
@@ -840,9 +834,7 @@ final class SnapshotTestingTests: XCTestCase {
         osName = "tvOS"
         #endif
 
-        if !ProcessInfo.processInfo.environment.keys.contains("GITHUB_WORKFLOW") {
-            assertSnapshot(matching: path, as: .image, named: osName)
-        }
+        assertSnapshot(matching: path, as: .image, named: osName)
 
         if #available(iOS 11.0, tvOS 11.0, *) {
             assertSnapshot(matching: path, as: .elementsDescription, named: osName)
@@ -1096,13 +1088,11 @@ final class SnapshotTestingTests: XCTestCase {
         let stackView = UIStackView(arrangedSubviews: [label, webView])
         stackView.axis = .vertical
 
-        if !ProcessInfo.processInfo.environment.keys.contains("GITHUB_WORKFLOW") {
-            assertSnapshot(
-                matching: stackView,
-                as: .image(size: .init(width: 800, height: 600)),
-                named: platform
-            )
-        }
+        assertSnapshot(
+            matching: stackView,
+            as: .image(size: .init(width: 800, height: 600)),
+            named: platform
+        )
         #endif
     }
 
