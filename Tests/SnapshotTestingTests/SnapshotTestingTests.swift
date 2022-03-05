@@ -86,8 +86,8 @@ final class SnapshotTestingTests: XCTestCase {
         """)
     }
 
+    #if os(iOS)
     func testAutolayout() {
-        #if os(iOS)
         let viewController = UIViewController()
         viewController.view.translatesAutoresizingMaskIntoConstraints = false
         let subview = UIView()
@@ -100,8 +100,8 @@ final class SnapshotTestingTests: XCTestCase {
             subview.rightAnchor.constraint(equalTo: viewController.view.rightAnchor)
         ])
         assertSnapshot(matching: viewController, as: .image)
-        #endif
     }
+    #endif
 
     func testDeterministicDictionaryAndSetSnapshots() {
         struct Person: Hashable { let name: String }
@@ -150,8 +150,8 @@ final class SnapshotTestingTests: XCTestCase {
         )
     }
 
+    #if os(iOS) || os(tvOS) || os(macOS)
     func testCGPath() {
-        #if os(iOS) || os(tvOS) || os(macOS)
         let path = CGPath.heart
 
         let osName: String
@@ -168,8 +168,8 @@ final class SnapshotTestingTests: XCTestCase {
         if #available(iOS 11.0, OSX 10.13, tvOS 11.0, *) {
             assertSnapshot(matching: path, as: .elementsDescription, named: osName)
         }
-        #endif
     }
+    #endif
 
     func testData() {
         let data = Data([0xDE, 0xAD, 0xBE, 0xEF])
@@ -187,27 +187,26 @@ final class SnapshotTestingTests: XCTestCase {
         assertSnapshot(matching: user, as: .plist)
     }
 
+    #if os(iOS) || os(macOS)
     func testMixedViews() {
-//    #if os(iOS) || os(macOS)
-//    // NB: CircleCI crashes while trying to instantiate SKView.
-//      let webView = WKWebView(frame: .init(x: 0, y: 0, width: 50, height: 50))
-//      webView.loadHTMLString("🌎", baseURL: nil)
-//
-//      let skView = SKView(frame: .init(x: 50, y: 0, width: 50, height: 50))
-//      let scene = SKScene(size: .init(width: 50, height: 50))
-//      let node = SKShapeNode(circleOfRadius: 15)
-//      node.fillColor = .red
-//      node.position = .init(x: 25, y: 25)
-//      scene.addChild(node)
-//      skView.presentScene(scene)
-//
-//      let view = View(frame: .init(x: 0, y: 0, width: 100, height: 50))
-//      view.addSubview(webView)
-//      view.addSubview(skView)
-//
-//      assertSnapshot(matching: view, as: .image, named: platform)
-//    #endif
+        let webView = WKWebView(frame: .init(x: 0, y: 0, width: 50, height: 50))
+        webView.loadHTMLString("🌎", baseURL: nil)
+
+        let skView = SKView(frame: .init(x: 50, y: 0, width: 50, height: 50))
+        let scene = SKScene(size: .init(width: 50, height: 50))
+        let node = SKShapeNode(circleOfRadius: 15)
+        node.fillColor = .red
+        node.position = .init(x: 25, y: 25)
+        scene.addChild(node)
+        skView.presentScene(scene)
+
+        let view = View(frame: .init(x: 0, y: 0, width: 100, height: 50))
+        view.addSubview(webView)
+        view.addSubview(skView)
+
+        assertSnapshot(matching: view, as: .image, named: platform)
     }
+    #endif
 
     func testMultipleSnapshots() {
         assertSnapshot(matching: [1], as: .dump)
@@ -220,17 +219,15 @@ final class SnapshotTestingTests: XCTestCase {
         assertSnapshot(matching: user, as: .dump, named: "named")
     }
 
+    #if os(macOS)
     func testNSBezierPath() {
-        #if os(macOS)
         let path = NSBezierPath.heart
 
         assertSnapshot(matching: path, as: .image, named: "macOS")
         assertSnapshot(matching: path, as: .elementsDescription, named: "macOS")
-        #endif
     }
 
     func testNSView() {
-        #if os(macOS)
         let button = NSButton()
         button.appearance = NSAppearance(named: .aqua)
         button.bezelStyle = .rounded
@@ -239,11 +236,9 @@ final class SnapshotTestingTests: XCTestCase {
 
         assertSnapshot(matching: button, as: .image)
         assertSnapshot(matching: button, as: .recursiveDescription)
-        #endif
     }
 
     func testNSViewWithLayer() {
-        #if os(macOS)
         let view = NSView()
         view.frame = CGRect(origin: .zero, size: .init(width: 10, height: 10))
         view.wantsLayer = true
@@ -252,11 +247,11 @@ final class SnapshotTestingTests: XCTestCase {
 
         assertSnapshot(matching: view, as: .image)
         assertSnapshot(matching: view, as: .recursiveDescription)
-        #endif
     }
+    #endif
 
+    #if os(iOS) || os(macOS) || os(tvOS)
     func testPrecision() {
-        #if os(iOS) || os(macOS) || os(tvOS)
         #if os(iOS) || os(tvOS)
         let label = UILabel()
         #if os(iOS)
@@ -278,63 +273,61 @@ final class SnapshotTestingTests: XCTestCase {
         assertSnapshot(matching: label, as: .image(precision: 0.9), named: platform)
         label.text = "Hello"
         assertSnapshot(matching: label, as: .image(precision: 0.9), named: platform)
-        #endif
     }
+    #endif
 
+    #if os(iOS) || os(macOS) || os(tvOS)
     func testSCNView() {
-//    #if os(iOS) || os(macOS) || os(tvOS)
-//    // NB: CircleCI crashes while trying to instantiate SCNView.
-//      let scene = SCNScene()
-//
-//      let sphereGeometry = SCNSphere(radius: 3)
-//      sphereGeometry.segmentCount = 200
-//      let sphereNode = SCNNode(geometry: sphereGeometry)
-//      sphereNode.position = SCNVector3Zero
-//      scene.rootNode.addChildNode(sphereNode)
-//
-//      sphereGeometry.firstMaterial?.diffuse.contents = URL(fileURLWithPath: String(#file), isDirectory: false)
-//        .deletingLastPathComponent()
-//        .appendingPathComponent("__Fixtures__/earth.png")
-//
-//      let cameraNode = SCNNode()
-//      cameraNode.camera = SCNCamera()
-//      cameraNode.position = SCNVector3Make(0, 0, 8)
-//      scene.rootNode.addChildNode(cameraNode)
-//
-//      let omniLight = SCNLight()
-//      omniLight.type = .omni
-//      let omniLightNode = SCNNode()
-//      omniLightNode.light = omniLight
-//      omniLightNode.position = SCNVector3Make(10, 10, 10)
-//      scene.rootNode.addChildNode(omniLightNode)
-//
-//      assertSnapshot(
-//        matching: scene,
-//        as: .image(size: .init(width: 500, height: 500)),
-//        named: platform
-//      )
-//    #endif
-    }
+        let scene = SCNScene()
 
+        let sphereGeometry = SCNSphere(radius: 3)
+        sphereGeometry.segmentCount = 200
+        let sphereNode = SCNNode(geometry: sphereGeometry)
+        sphereNode.position = SCNVector3Zero
+        scene.rootNode.addChildNode(sphereNode)
+
+        sphereGeometry.firstMaterial?.diffuse.contents = URL(fileURLWithPath: String(#file), isDirectory: false)
+            .deletingLastPathComponent()
+            .appendingPathComponent("__Fixtures__/earth.png")
+
+        let cameraNode = SCNNode()
+        cameraNode.camera = SCNCamera()
+        cameraNode.position = SCNVector3Make(0, 0, 8)
+        scene.rootNode.addChildNode(cameraNode)
+
+        let omniLight = SCNLight()
+        omniLight.type = .omni
+        let omniLightNode = SCNNode()
+        omniLightNode.light = omniLight
+        omniLightNode.position = SCNVector3Make(10, 10, 10)
+        scene.rootNode.addChildNode(omniLightNode)
+
+        assertSnapshot(
+            matching: scene,
+            as: .image(size: .init(width: 500, height: 500)),
+            named: platform
+        )
+    }
+    #endif
+
+    #if os(iOS) || os(macOS) || os(tvOS)
     func testSKView() {
-//    #if os(iOS) || os(macOS) || os(tvOS)
-//    // NB: CircleCI crashes while trying to instantiate SKView.
-//      let scene = SKScene(size: .init(width: 50, height: 50))
-//      let node = SKShapeNode(circleOfRadius: 15)
-//      node.fillColor = .red
-//      node.position = .init(x: 25, y: 25)
-//      scene.addChild(node)
-//
-//      assertSnapshot(
-//        matching: scene,
-//        as: .image(size: .init(width: 50, height: 50)),
-//        named: platform
-//      )
-//    #endif
-    }
+        let scene = SKScene(size: .init(width: 50, height: 50))
+        let node = SKShapeNode(circleOfRadius: 15)
+        node.fillColor = .red
+        node.position = .init(x: 25, y: 25)
+        scene.addChild(node)
 
-    func testTableViewController() {
-        #if os(iOS)
+        assertSnapshot(
+            matching: scene,
+            as: .image(size: .init(width: 50, height: 50)),
+            named: platform
+        )
+    }
+    #endif
+
+    #if os(iOS)
+    func testUITableViewController() {
         class TableViewController: UITableViewController {
             override func viewDidLoad() {
                 super.viewDidLoad()
@@ -353,11 +346,11 @@ final class SnapshotTestingTests: XCTestCase {
         }
         let tableViewController = TableViewController()
         assertSnapshot(matching: tableViewController, as: .image(on: .iPhoneSe))
-        #endif
     }
+    #endif
 
+    #if os(iOS)
     func testAssertMultipleSnapshot() {
-        #if os(iOS)
         class TableViewController: UITableViewController {
             override func viewDidLoad() {
                 super.viewDidLoad()
@@ -377,11 +370,11 @@ final class SnapshotTestingTests: XCTestCase {
         let tableViewController = TableViewController()
         assertSnapshots(matching: tableViewController, as: ["iPhoneSE-image": .image(on: .iPhoneSe), "iPad-image": .image(on: .iPadMini)])
         assertSnapshots(matching: tableViewController, as: [.image(on: .iPhoneX), .image(on: .iPhoneXsMax)])
-        #endif
     }
+    #endif
 
+    #if os(iOS) || os(tvOS)
     func testTraits() {
-        #if os(iOS) || os(tvOS)
         if #available(iOS 11.0, tvOS 11.0, *) {
             class MyViewController: UIViewController {
                 let topLabel = UILabel()
@@ -568,140 +561,138 @@ final class SnapshotTestingTests: XCTestCase {
             )
             #endif
         }
-        #endif
     }
+    #endif
 
+    #if os(iOS)
+    @available(iOS 11.0, *)
     func testTraitsEmbeddedInTabNavigation() {
-        #if os(iOS)
-        if #available(iOS 11.0, *) {
-            class MyViewController: UIViewController {
-                let topLabel = UILabel()
-                let leadingLabel = UILabel()
-                let trailingLabel = UILabel()
-                let bottomLabel = UILabel()
+        class MyViewController: UIViewController {
+            let topLabel = UILabel()
+            let leadingLabel = UILabel()
+            let trailingLabel = UILabel()
+            let bottomLabel = UILabel()
 
-                override func viewDidLoad() {
-                    super.viewDidLoad()
+            override func viewDidLoad() {
+                super.viewDidLoad()
 
-                    self.navigationItem.leftBarButtonItem = .init(barButtonSystemItem: .add, target: nil, action: nil)
+                self.navigationItem.leftBarButtonItem = .init(barButtonSystemItem: .add, target: nil, action: nil)
 
-                    self.view.backgroundColor = .white
+                self.view.backgroundColor = .white
 
-                    self.topLabel.text = "What's"
-                    self.leadingLabel.text = "the"
-                    self.trailingLabel.text = "point"
-                    self.bottomLabel.text = "?"
+                self.topLabel.text = "What's"
+                self.leadingLabel.text = "the"
+                self.trailingLabel.text = "point"
+                self.bottomLabel.text = "?"
 
-                    self.topLabel.translatesAutoresizingMaskIntoConstraints = false
-                    self.leadingLabel.translatesAutoresizingMaskIntoConstraints = false
-                    self.trailingLabel.translatesAutoresizingMaskIntoConstraints = false
-                    self.bottomLabel.translatesAutoresizingMaskIntoConstraints = false
+                self.topLabel.translatesAutoresizingMaskIntoConstraints = false
+                self.leadingLabel.translatesAutoresizingMaskIntoConstraints = false
+                self.trailingLabel.translatesAutoresizingMaskIntoConstraints = false
+                self.bottomLabel.translatesAutoresizingMaskIntoConstraints = false
 
-                    self.view.addSubview(self.topLabel)
-                    self.view.addSubview(self.leadingLabel)
-                    self.view.addSubview(self.trailingLabel)
-                    self.view.addSubview(self.bottomLabel)
+                self.view.addSubview(self.topLabel)
+                self.view.addSubview(self.leadingLabel)
+                self.view.addSubview(self.trailingLabel)
+                self.view.addSubview(self.bottomLabel)
 
-                    NSLayoutConstraint.activate([
-                        self.topLabel.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
-                        self.topLabel.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor),
-                        self.leadingLabel.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor),
-                        self.leadingLabel.trailingAnchor.constraint(lessThanOrEqualTo: self.view.safeAreaLayoutGuide.centerXAnchor),
+                NSLayoutConstraint.activate([
+                    self.topLabel.topAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.topAnchor),
+                    self.topLabel.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor),
+                    self.leadingLabel.leadingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.leadingAnchor),
+                    self.leadingLabel.trailingAnchor.constraint(lessThanOrEqualTo: self.view.safeAreaLayoutGuide.centerXAnchor),
 //            self.leadingLabel.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor),
-                        self.leadingLabel.centerYAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerYAnchor),
-                        self.trailingLabel.leadingAnchor.constraint(greaterThanOrEqualTo: self.view.safeAreaLayoutGuide.centerXAnchor),
-                        self.trailingLabel.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor),
-                        self.trailingLabel.centerYAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerYAnchor),
-                        self.bottomLabel.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor),
-                        self.bottomLabel.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor)
-                    ])
-                }
-
-                override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-                    super.traitCollectionDidChange(previousTraitCollection)
-                    self.topLabel.font = .preferredFont(forTextStyle: .headline, compatibleWith: self.traitCollection)
-                    self.leadingLabel.font = .preferredFont(forTextStyle: .body, compatibleWith: self.traitCollection)
-                    self.trailingLabel.font = .preferredFont(forTextStyle: .body, compatibleWith: self.traitCollection)
-                    self.bottomLabel.font = .preferredFont(forTextStyle: .subheadline, compatibleWith: self.traitCollection)
-                    self.view.setNeedsUpdateConstraints()
-                    self.view.updateConstraintsIfNeeded()
-                }
+                    self.leadingLabel.centerYAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerYAnchor),
+                    self.trailingLabel.leadingAnchor.constraint(greaterThanOrEqualTo: self.view.safeAreaLayoutGuide.centerXAnchor),
+                    self.trailingLabel.trailingAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.trailingAnchor),
+                    self.trailingLabel.centerYAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerYAnchor),
+                    self.bottomLabel.bottomAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.bottomAnchor),
+                    self.bottomLabel.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor)
+                ])
             }
 
-            let myViewController = MyViewController()
-            let navController = UINavigationController(rootViewController: myViewController)
-            let viewController = UITabBarController()
-            viewController.setViewControllers([navController], animated: false)
-
-            assertSnapshot(matching: viewController, as: .image(on: .iPhoneSe), named: "iphone-se")
-            assertSnapshot(matching: viewController, as: .image(on: .iPhone8), named: "iphone-8")
-            assertSnapshot(matching: viewController, as: .image(on: .iPhone8Plus), named: "iphone-8-plus")
-            assertSnapshot(matching: viewController, as: .image(on: .iPhoneX), named: "iphone-x")
-            assertSnapshot(matching: viewController, as: .image(on: .iPhoneXr), named: "iphone-xr")
-            assertSnapshot(matching: viewController, as: .image(on: .iPhoneXsMax), named: "iphone-xs-max")
-            assertSnapshot(matching: viewController, as: .image(on: .iPadMini), named: "ipad-mini")
-            assertSnapshot(matching: viewController, as: .image(on: .iPad9_7), named: "ipad-9-7")
-            assertSnapshot(matching: viewController, as: .image(on: .iPad10_2), named: "ipad-10-2")
-            assertSnapshot(matching: viewController, as: .image(on: .iPadPro10_5), named: "ipad-pro-10-5")
-            assertSnapshot(matching: viewController, as: .image(on: .iPadPro11), named: "ipad-pro-11")
-            assertSnapshot(matching: viewController, as: .image(on: .iPadPro12_9), named: "ipad-pro-12-9")
-
-            assertSnapshot(matching: viewController, as: .image(on: .iPhoneSe(.portrait)), named: "iphone-se")
-            assertSnapshot(matching: viewController, as: .image(on: .iPhone8(.portrait)), named: "iphone-8")
-            assertSnapshot(matching: viewController, as: .image(on: .iPhone8Plus(.portrait)), named: "iphone-8-plus")
-            assertSnapshot(matching: viewController, as: .image(on: .iPhoneX(.portrait)), named: "iphone-x")
-            assertSnapshot(matching: viewController, as: .image(on: .iPhoneXr(.portrait)), named: "iphone-xr")
-            assertSnapshot(matching: viewController, as: .image(on: .iPhoneXsMax(.portrait)), named: "iphone-xs-max")
-            assertSnapshot(matching: viewController, as: .image(on: .iPadMini(.landscape)), named: "ipad-mini")
-            assertSnapshot(matching: viewController, as: .image(on: .iPad9_7(.landscape)), named: "ipad-9-7")
-            assertSnapshot(matching: viewController, as: .image(on: .iPad10_2(.landscape)), named: "ipad-10-2")
-            assertSnapshot(matching: viewController, as: .image(on: .iPadPro10_5(.landscape)), named: "ipad-pro-10-5")
-            assertSnapshot(matching: viewController, as: .image(on: .iPadPro11(.landscape)), named: "ipad-pro-11")
-            assertSnapshot(matching: viewController, as: .image(on: .iPadPro12_9(.landscape)), named: "ipad-pro-12-9")
-
-            assertSnapshot(
-                matching: viewController, as: .image(on: .iPhoneSe(.landscape)), named: "iphone-se-alternative"
-            )
-            assertSnapshot(
-                matching: viewController, as: .image(on: .iPhone8(.landscape)), named: "iphone-8-alternative"
-            )
-            assertSnapshot(
-                matching: viewController, as: .image(on: .iPhone8Plus(.landscape)), named: "iphone-8-plus-alternative"
-            )
-            assertSnapshot(
-                matching: viewController, as: .image(on: .iPhoneX(.landscape)), named: "iphone-x-alternative"
-            )
-            assertSnapshot(
-                matching: viewController, as: .image(on: .iPhoneXr(.landscape)), named: "iphone-xr-alternative"
-            )
-            assertSnapshot(
-                matching: viewController, as: .image(on: .iPhoneXsMax(.landscape)), named: "iphone-xs-max-alternative"
-            )
-            assertSnapshot(
-                matching: viewController, as: .image(on: .iPadMini(.portrait)), named: "ipad-mini-alternative"
-            )
-            assertSnapshot(
-                matching: viewController, as: .image(on: .iPad9_7(.portrait)), named: "ipad-9-7-alternative"
-            )
-            assertSnapshot(
-                matching: viewController, as: .image(on: .iPad10_2(.portrait)), named: "ipad-10-2-alternative"
-            )
-            assertSnapshot(
-                matching: viewController, as: .image(on: .iPadPro10_5(.portrait)), named: "ipad-pro-10-5-alternative"
-            )
-            assertSnapshot(
-                matching: viewController, as: .image(on: .iPadPro11(.portrait)), named: "ipad-pro-11-alternative"
-            )
-            assertSnapshot(
-                matching: viewController, as: .image(on: .iPadPro12_9(.portrait)), named: "ipad-pro-12-9-alternative"
-            )
+            override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+                super.traitCollectionDidChange(previousTraitCollection)
+                self.topLabel.font = .preferredFont(forTextStyle: .headline, compatibleWith: self.traitCollection)
+                self.leadingLabel.font = .preferredFont(forTextStyle: .body, compatibleWith: self.traitCollection)
+                self.trailingLabel.font = .preferredFont(forTextStyle: .body, compatibleWith: self.traitCollection)
+                self.bottomLabel.font = .preferredFont(forTextStyle: .subheadline, compatibleWith: self.traitCollection)
+                self.view.setNeedsUpdateConstraints()
+                self.view.updateConstraintsIfNeeded()
+            }
         }
-        #endif
+
+        let myViewController = MyViewController()
+        let navController = UINavigationController(rootViewController: myViewController)
+        let viewController = UITabBarController()
+        viewController.setViewControllers([navController], animated: false)
+
+        assertSnapshot(matching: viewController, as: .image(on: .iPhoneSe), named: "iphone-se")
+        assertSnapshot(matching: viewController, as: .image(on: .iPhone8), named: "iphone-8")
+        assertSnapshot(matching: viewController, as: .image(on: .iPhone8Plus), named: "iphone-8-plus")
+        assertSnapshot(matching: viewController, as: .image(on: .iPhoneX), named: "iphone-x")
+        assertSnapshot(matching: viewController, as: .image(on: .iPhoneXr), named: "iphone-xr")
+        assertSnapshot(matching: viewController, as: .image(on: .iPhoneXsMax), named: "iphone-xs-max")
+        assertSnapshot(matching: viewController, as: .image(on: .iPadMini), named: "ipad-mini")
+        assertSnapshot(matching: viewController, as: .image(on: .iPad9_7), named: "ipad-9-7")
+        assertSnapshot(matching: viewController, as: .image(on: .iPad10_2), named: "ipad-10-2")
+        assertSnapshot(matching: viewController, as: .image(on: .iPadPro10_5), named: "ipad-pro-10-5")
+        assertSnapshot(matching: viewController, as: .image(on: .iPadPro11), named: "ipad-pro-11")
+        assertSnapshot(matching: viewController, as: .image(on: .iPadPro12_9), named: "ipad-pro-12-9")
+
+        assertSnapshot(matching: viewController, as: .image(on: .iPhoneSe(.portrait)), named: "iphone-se")
+        assertSnapshot(matching: viewController, as: .image(on: .iPhone8(.portrait)), named: "iphone-8")
+        assertSnapshot(matching: viewController, as: .image(on: .iPhone8Plus(.portrait)), named: "iphone-8-plus")
+        assertSnapshot(matching: viewController, as: .image(on: .iPhoneX(.portrait)), named: "iphone-x")
+        assertSnapshot(matching: viewController, as: .image(on: .iPhoneXr(.portrait)), named: "iphone-xr")
+        assertSnapshot(matching: viewController, as: .image(on: .iPhoneXsMax(.portrait)), named: "iphone-xs-max")
+        assertSnapshot(matching: viewController, as: .image(on: .iPadMini(.landscape)), named: "ipad-mini")
+        assertSnapshot(matching: viewController, as: .image(on: .iPad9_7(.landscape)), named: "ipad-9-7")
+        assertSnapshot(matching: viewController, as: .image(on: .iPad10_2(.landscape)), named: "ipad-10-2")
+        assertSnapshot(matching: viewController, as: .image(on: .iPadPro10_5(.landscape)), named: "ipad-pro-10-5")
+        assertSnapshot(matching: viewController, as: .image(on: .iPadPro11(.landscape)), named: "ipad-pro-11")
+        assertSnapshot(matching: viewController, as: .image(on: .iPadPro12_9(.landscape)), named: "ipad-pro-12-9")
+
+        assertSnapshot(
+            matching: viewController, as: .image(on: .iPhoneSe(.landscape)), named: "iphone-se-alternative"
+        )
+        assertSnapshot(
+            matching: viewController, as: .image(on: .iPhone8(.landscape)), named: "iphone-8-alternative"
+        )
+        assertSnapshot(
+            matching: viewController, as: .image(on: .iPhone8Plus(.landscape)), named: "iphone-8-plus-alternative"
+        )
+        assertSnapshot(
+            matching: viewController, as: .image(on: .iPhoneX(.landscape)), named: "iphone-x-alternative"
+        )
+        assertSnapshot(
+            matching: viewController, as: .image(on: .iPhoneXr(.landscape)), named: "iphone-xr-alternative"
+        )
+        assertSnapshot(
+            matching: viewController, as: .image(on: .iPhoneXsMax(.landscape)), named: "iphone-xs-max-alternative"
+        )
+        assertSnapshot(
+            matching: viewController, as: .image(on: .iPadMini(.portrait)), named: "ipad-mini-alternative"
+        )
+        assertSnapshot(
+            matching: viewController, as: .image(on: .iPad9_7(.portrait)), named: "ipad-9-7-alternative"
+        )
+        assertSnapshot(
+            matching: viewController, as: .image(on: .iPad10_2(.portrait)), named: "ipad-10-2-alternative"
+        )
+        assertSnapshot(
+            matching: viewController, as: .image(on: .iPadPro10_5(.portrait)), named: "ipad-pro-10-5-alternative"
+        )
+        assertSnapshot(
+            matching: viewController, as: .image(on: .iPadPro11(.portrait)), named: "ipad-pro-11-alternative"
+        )
+        assertSnapshot(
+            matching: viewController, as: .image(on: .iPadPro12_9(.portrait)), named: "ipad-pro-12-9-alternative"
+        )
     }
+    #endif
 
+    #if os(iOS)
     func testCollectionViewsWithMultipleScreenSizes() {
-        #if os(iOS)
-
         final class CollectionViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
             let flowLayout: UICollectionViewFlowLayout = {
                 let layout = UICollectionViewFlowLayout()
@@ -774,30 +765,27 @@ final class SnapshotTestingTests: XCTestCase {
             "iphone8": .image(on: .iPhone8),
             "iphoneMax": .image(on: .iPhoneXsMax)
         ])
-        #endif
     }
+    #endif
 
+    #if os(iOS)
+    @available(iOS 11.0, *)
     func testTraitsWithView() {
-        #if os(iOS)
-        if #available(iOS 11.0, *) {
-            let label = UILabel()
-            label.font = .preferredFont(forTextStyle: .title1)
-            label.adjustsFontForContentSizeCategory = true
-            label.text = "What's the point?"
+        let label = UILabel()
+        label.font = .preferredFont(forTextStyle: .title1)
+        label.adjustsFontForContentSizeCategory = true
+        label.text = "What's the point?"
 
-            allContentSizes.forEach { name, contentSize in
-                assertSnapshot(
-                    matching: label,
-                    as: .image(traits: .init(preferredContentSizeCategory: contentSize)),
-                    named: "label-\(name)"
-                )
-            }
+        allContentSizes.forEach { name, contentSize in
+            assertSnapshot(
+                matching: label,
+                as: .image(traits: .init(preferredContentSizeCategory: contentSize)),
+                named: "label-\(name)"
+            )
         }
-        #endif
     }
 
     func testTraitsWithViewController() {
-        #if os(iOS)
         let label = UILabel()
         label.font = .preferredFont(forTextStyle: .title1)
         label.adjustsFontForContentSizeCategory = true
@@ -820,11 +808,11 @@ final class SnapshotTestingTests: XCTestCase {
                 named: "label-\(name)"
             )
         }
-        #endif
     }
+    #endif
 
+    #if os(iOS) || os(tvOS)
     func testUIBezierPath() {
-        #if os(iOS) || os(tvOS)
         let path = UIBezierPath.heart
 
         let osName: String
@@ -839,19 +827,17 @@ final class SnapshotTestingTests: XCTestCase {
         if #available(iOS 11.0, tvOS 11.0, *) {
             assertSnapshot(matching: path, as: .elementsDescription, named: osName)
         }
-        #endif
     }
+    #endif
 
+    #if os(iOS)
     func testUIView() {
-        #if os(iOS)
         let view = UIButton(type: .contactAdd)
         assertSnapshot(matching: view, as: .image)
         assertSnapshot(matching: view, as: .recursiveDescription)
-        #endif
     }
 
     func testUIViewControllerLifeCycle() {
-        #if os(iOS)
         class ViewController: UIViewController {
             let viewDidLoadExpectation: XCTestExpectation
             let viewWillAppearExpectation: XCTestExpectation
@@ -936,22 +922,18 @@ final class SnapshotTestingTests: XCTestCase {
             timeout: 1,
             enforceOrder: true
         )
-        #endif
     }
 
     func testCALayer() {
-        #if os(iOS)
         let layer = CALayer()
         layer.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
         layer.backgroundColor = UIColor.red.cgColor
         layer.borderWidth = 4.0
         layer.borderColor = UIColor.black.cgColor
         assertSnapshot(matching: layer, as: .image)
-        #endif
     }
 
     func testCALayerWithGradient() {
-        #if os(iOS)
         let baseLayer = CALayer()
         baseLayer.frame = CGRect(x: 0, y: 0, width: 100, height: 100)
         let gradientLayer = CAGradientLayer()
@@ -959,11 +941,9 @@ final class SnapshotTestingTests: XCTestCase {
         gradientLayer.frame = baseLayer.frame
         baseLayer.addSublayer(gradientLayer)
         assertSnapshot(matching: baseLayer, as: .image)
-        #endif
     }
 
     func testViewControllerHierarchy() {
-        #if os(iOS)
         let page = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
         page.setViewControllers([UIViewController()], direction: .forward, animated: false)
         let tab = UITabBarController()
@@ -975,8 +955,8 @@ final class SnapshotTestingTests: XCTestCase {
             UINavigationController(rootViewController: UIViewController())
         ]
         assertSnapshot(matching: tab, as: .hierarchy)
-        #endif
     }
+    #endif
 
     func testURLRequest() {
         var get = URLRequest(url: URL(string: "https://www.pointfree.co/")!)
@@ -1036,8 +1016,8 @@ final class SnapshotTestingTests: XCTestCase {
         """)
     }
 
+    #if os(iOS) || os(macOS)
     func testWebView() throws {
-        #if os(iOS) || os(macOS)
         let fixtureUrl = URL(fileURLWithPath: String(#file), isDirectory: false)
             .deletingLastPathComponent()
             .appendingPathComponent("__Fixtures__/pointfree.html")
@@ -1050,11 +1030,11 @@ final class SnapshotTestingTests: XCTestCase {
             as: .image(size: .init(width: 800, height: 600)),
             named: platform
         )
-        #endif
     }
+    #endif
 
+    #if os(iOS) || os(tvOS)
     func testViewWithZeroHeightOrWidth() {
-        #if os(iOS) || os(tvOS)
         var rect = CGRect(x: 0, y: 0, width: 350, height: 0)
         var view = UIView(frame: rect)
         view.backgroundColor = .red
@@ -1069,11 +1049,11 @@ final class SnapshotTestingTests: XCTestCase {
         view = UIView(frame: rect)
         view.backgroundColor = .blue
         assertSnapshot(matching: view, as: .image, named: "noWidth.noHeight")
-        #endif
     }
+    #endif
 
+    #if os(iOS)
     func testEmbeddedWebView() throws {
-        #if os(iOS)
         let label = UILabel()
         label.text = "Hello, Blob!"
 
@@ -1093,8 +1073,8 @@ final class SnapshotTestingTests: XCTestCase {
             as: .image(size: .init(width: 800, height: 600)),
             named: platform
         )
-        #endif
     }
+    #endif
 
     #if os(iOS) || os(macOS)
     final class ManipulatingWKWebViewNavigationDelegate: NSObject, WKNavigationDelegate {
@@ -1154,9 +1134,9 @@ final class SnapshotTestingTests: XCTestCase {
     }
     #endif
 
+    #if os(iOS)
     @available(iOS 13.0, *)
     func testSwiftUIView_iOS() {
-        #if os(iOS)
         struct MyView: SwiftUI.View {
             var body: some SwiftUI.View {
                 HStack {
@@ -1175,12 +1155,12 @@ final class SnapshotTestingTests: XCTestCase {
         assertSnapshot(matching: view, as: .image(layout: .sizeThatFits, traits: .init(userInterfaceStyle: .light)), named: "size-that-fits")
         assertSnapshot(matching: view, as: .image(layout: .fixed(width: 200.0, height: 100.0), traits: .init(userInterfaceStyle: .light)), named: "fixed")
         assertSnapshot(matching: view, as: .image(layout: .device(config: .iPhoneSe), traits: .init(userInterfaceStyle: .light)), named: "device")
-        #endif
     }
+    #endif
 
+    #if os(tvOS)
     @available(tvOS 13.0, *)
     func testSwiftUIView_tvOS() {
-        #if os(tvOS)
         struct MyView: SwiftUI.View {
             var body: some SwiftUI.View {
                 HStack {
@@ -1198,8 +1178,8 @@ final class SnapshotTestingTests: XCTestCase {
         assertSnapshot(matching: view, as: .image(layout: .sizeThatFits), named: "size-that-fits")
         assertSnapshot(matching: view, as: .image(layout: .fixed(width: 300.0, height: 100.0)), named: "fixed")
         assertSnapshot(matching: view, as: .image(layout: .device(config: .tv)), named: "device")
-        #endif
     }
+    #endif
 }
 
 #if os(iOS)
