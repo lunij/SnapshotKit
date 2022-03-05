@@ -6,8 +6,6 @@ import UIKit
 public extension UITraitCollection {
     static func iPhoneSe(_ orientation: ViewImageConfig.Orientation) -> UITraitCollection {
         let base: [UITraitCollection] = [
-//            .init(displayGamut: .SRGB),
-//            .init(displayScale: 2),
             .init(forceTouchCapability: .available),
             .init(layoutDirection: .leftToRight),
             .init(preferredContentSizeCategory: .medium),
@@ -33,8 +31,6 @@ public extension UITraitCollection {
 
     static func iPhone8(_ orientation: ViewImageConfig.Orientation) -> UITraitCollection {
         let base: [UITraitCollection] = [
-//            .init(displayGamut: .P3),
-//            .init(displayScale: 2),
             .init(forceTouchCapability: .available),
             .init(layoutDirection: .leftToRight),
             .init(preferredContentSizeCategory: .medium),
@@ -60,8 +56,6 @@ public extension UITraitCollection {
 
     static func iPhone8Plus(_ orientation: ViewImageConfig.Orientation) -> UITraitCollection {
         let base: [UITraitCollection] = [
-//            .init(displayGamut: .P3),
-//            .init(displayScale: 3),
             .init(forceTouchCapability: .available),
             .init(layoutDirection: .leftToRight),
             .init(preferredContentSizeCategory: .medium),
@@ -87,8 +81,6 @@ public extension UITraitCollection {
 
     static func iPhoneX(_ orientation: ViewImageConfig.Orientation) -> UITraitCollection {
         let base: [UITraitCollection] = [
-//            .init(displayGamut: .P3),
-//            .init(displayScale: 3),
             .init(forceTouchCapability: .available),
             .init(layoutDirection: .leftToRight),
             .init(preferredContentSizeCategory: .medium),
@@ -114,8 +106,6 @@ public extension UITraitCollection {
 
     static func iPhoneXr(_ orientation: ViewImageConfig.Orientation) -> UITraitCollection {
         let base: [UITraitCollection] = [
-//            .init(displayGamut: .P3),
-//            .init(displayScale: 2),
             .init(forceTouchCapability: .unavailable),
             .init(layoutDirection: .leftToRight),
             .init(preferredContentSizeCategory: .medium),
@@ -141,8 +131,6 @@ public extension UITraitCollection {
 
     static func iPhoneXsMax(_ orientation: ViewImageConfig.Orientation) -> UITraitCollection {
         let base: [UITraitCollection] = [
-//            .init(displayGamut: .P3),
-//            .init(displayScale: 3),
             .init(forceTouchCapability: .available),
             .init(layoutDirection: .leftToRight),
             .init(preferredContentSizeCategory: .medium),
@@ -168,8 +156,6 @@ public extension UITraitCollection {
 
     static func iPhone12(_ orientation: ViewImageConfig.Orientation) -> UITraitCollection {
         let base: [UITraitCollection] = [
-//            .init(displayGamut: .P3),
-//            .init(displayScale: 3),
             .init(forceTouchCapability: .available),
             .init(layoutDirection: .leftToRight),
             .init(preferredContentSizeCategory: .medium),
@@ -195,8 +181,6 @@ public extension UITraitCollection {
 
     static func iPhone12ProMax(_ orientation: ViewImageConfig.Orientation) -> UITraitCollection {
         let base: [UITraitCollection] = [
-//            .init(displayGamut: .P3),
-//            .init(displayScale: 3),
             .init(forceTouchCapability: .available),
             .init(layoutDirection: .leftToRight),
             .init(preferredContentSizeCategory: .medium),
@@ -235,7 +219,7 @@ public extension UITraitCollection {
 
     private static let iPad = UITraitCollection(
         traitsFrom: [
-//            .init(displayScale: 2),
+            //            .init(displayScale: 2),
             .init(horizontalSizeClass: .regular),
             .init(verticalSizeClass: .regular),
             .init(userInterfaceIdiom: .pad)
@@ -250,6 +234,7 @@ public extension UITraitCollection {
         ]
     )
 }
+
 #elseif os(tvOS)
 public extension UITraitCollection {
     // to be implemented
