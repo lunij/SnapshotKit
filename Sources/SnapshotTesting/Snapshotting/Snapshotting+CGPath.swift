@@ -14,13 +14,9 @@ public extension Snapshotting where Value == CGPath, Format == NSImage {
     static func image(precision: Float = 1, subpixelThreshold: UInt8 = 0, drawingMode: CGPathDrawingMode = .eoFill) -> Snapshotting {
         SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold).pullback { path in
             let bounds = path.boundingBoxOfPath
-            var transform = CGAffineTransform(translationX: -bounds.origin.x, y: -bounds.origin.y)
-            let path = path.copy(using: &transform)! // swiftlint:disable:this force_unwrapping
-
             let image = NSImage(size: bounds.size)
             image.lockFocus()
             let context = NSGraphicsContext.current!.cgContext // swiftlint:disable:this force_unwrapping
-
             context.addPath(path)
             context.drawPath(using: drawingMode)
             image.unlockFocus()
