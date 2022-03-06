@@ -231,7 +231,10 @@ final class SnapshotTestingTests: XCTestCase {
         let button = NSButton()
         button.appearance = NSAppearance(named: .aqua)
         button.bezelStyle = .rounded
-        button.title = "Push Me"
+        button.attributedTitle = .init(string: "Push Me", attributes: [
+            .font: NSFont.systemFont(ofSize: 12),
+            .foregroundColor: NSColor.black
+        ])
         button.sizeToFit()
 
         assertSnapshot(matching: button, as: .image)
