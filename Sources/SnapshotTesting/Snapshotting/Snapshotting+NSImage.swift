@@ -13,11 +13,11 @@ public extension Diffing where Value == NSImage {
     /// - Returns: A new diffing strategy.
     static func image(precision: Float, subpixelThreshold: UInt8) -> Diffing {
         .init(
-            toData: { NSImagePNGRepresentation($0)! }, // swiftlint:disable:this force_unwrapping
+            toData: { $0.pngRepresentation! }, // swiftlint:disable:this force_unwrapping
             fromData: { NSImage(data: $0)! }, // swiftlint:disable:this force_unwrapping
             diff: { old, new in
-                guard !compare(old, new, precision: precision, subpixelThreshold: subpixelThreshold) else { return nil }
-                let difference = SnapshotTesting.diff(old, new)
+                guard !old.compare(to: new, precision: precision, subpixelThreshold: subpixelThreshold) else { return nil }
+                let difference = old.diff(to: new)
                 let message = new.size == old.size
                     ? "Newly-taken snapshot does not match reference."
                     : "Newly-taken snapshot@\(new.size) does not match reference@\(old.size)."
@@ -48,54 +48,78 @@ public extension Snapshotting where Value == NSImage, Format == NSImage {
     }
 }
 
-private func NSImagePNGRepresentation(_ image: NSImage) -> Data? {
-    guard let cgImage = image.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
-    let rep = NSBitmapImageRep(cgImage: cgImage)
-    rep.size = image.size
-    return rep.representation(using: .png, properties: [:])
-}
-
-// swiftlint:disable:next cyclomatic_complexity
-private func compare(_ old: NSImage, _ new: NSImage, precision: Float, subpixelThreshold: UInt8) -> Bool {
-    guard let oldCgImage = old.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return false }
-    guard let newCgImage = new.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return false }
-    guard oldCgImage.width != 0 else { return false }
-    guard newCgImage.width != 0 else { return false }
-    guard oldCgImage.width == newCgImage.width else { return false }
-    guard oldCgImage.height != 0 else { return false }
-    guard newCgImage.height != 0 else { return false }
-    guard oldCgImage.height == newCgImage.height else { return false }
-    guard let oldContext = context(for: oldCgImage) else { return false }
-    guard let newContext = context(for: newCgImage) else { return false }
-    guard let oldData = oldContext.data else { return false }
-    guard let newData = newContext.data else { return false }
-    let byteCount = oldContext.height * oldContext.bytesPerRow
-    if memcmp(oldData, newData, byteCount) == 0 { return true }
-    let newer = NSImage(data: NSImagePNGRepresentation(new)!)! // swiftlint:disable:this force_unwrapping
-    guard let newerCgImage = newer.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return false }
-    guard let newerContext = context(for: newerCgImage) else { return false }
-    guard let newerData = newerContext.data else { return false }
-    if memcmp(oldData, newerData, byteCount) == 0 { return true }
-    if precision >= 1 { return false }
-    let oldRep = NSBitmapImageRep(cgImage: oldCgImage)
-    let newRep = NSBitmapImageRep(cgImage: newerCgImage)
-    var differentPixelCount = 0
-    let pixelCount = oldRep.pixelsWide * oldRep.pixelsHigh
-    let threshold = Int((1 - precision) * Float(pixelCount))
-    let oldBitmapData: UnsafeMutablePointer<UInt8> = oldRep.bitmapData! // swiftlint:disable:this force_unwrapping
-    let newBitmapData: UnsafeMutablePointer<UInt8> = newRep.bitmapData! // swiftlint:disable:this force_unwrapping
-
-    var offset = 0
-    while offset < pixelCount * 4 {
-        if oldBitmapData[offset].diff(between: newBitmapData[offset]) > subpixelThreshold {
-            differentPixelCount += 1
-            if differentPixelCount > threshold {
-                return false
-            }
-        }
-        offset += 1
+private extension NSImage {
+    var pngRepresentation: Data? {
+        guard let cgImage = cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
+        let imageRep = NSBitmapImageRep(cgImage: cgImage)
+        imageRep.size = size
+        return imageRep.representation(using: .png, properties: [:])
     }
-    return true
+
+    // swiftlint:disable:next cyclomatic_complexity
+    func compare(to other: NSImage, precision: Float, subpixelThreshold: UInt8) -> Bool {
+        guard let oldCgImage = cgImage(forProposedRect: nil, context: nil, hints: nil) else { return false }
+        guard let newCgImage = other.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return false }
+
+        guard oldCgImage.width == newCgImage.width else { return false }
+        guard oldCgImage.height == newCgImage.height else { return false }
+
+        guard let oldContext = context(for: oldCgImage) else { return false }
+        guard let newContext = context(for: newCgImage) else { return false }
+
+        guard let oldData = oldContext.data else { return false }
+        guard let newData = newContext.data else { return false }
+
+        let byteCount = oldContext.height * oldContext.bytesPerRow
+        if memcmp(oldData, newData, byteCount) == 0 { return true }
+
+        let newer = NSImage(data: other.pngRepresentation!)! // swiftlint:disable:this force_unwrapping
+
+        guard let newerCgImage = newer.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return false }
+        guard let newerContext = context(for: newerCgImage) else { return false }
+        guard let newerData = newerContext.data else { return false }
+
+        if memcmp(oldData, newerData, byteCount) == 0 { return true }
+        if precision >= 1 { return false }
+
+        let oldRep = NSBitmapImageRep(cgImage: oldCgImage)
+        let newRep = NSBitmapImageRep(cgImage: newerCgImage)
+
+        var differentPixelCount = 0
+        let pixelCount = oldRep.pixelsWide * oldRep.pixelsHigh
+        let threshold = Int((1 - precision) * Float(pixelCount))
+
+        let oldBitmapData: UnsafeMutablePointer<UInt8> = oldRep.bitmapData! // swiftlint:disable:this force_unwrapping
+        let newBitmapData: UnsafeMutablePointer<UInt8> = newRep.bitmapData! // swiftlint:disable:this force_unwrapping
+
+        var offset = 0
+        while offset < pixelCount * 4 {
+            if oldBitmapData[offset].diff(between: newBitmapData[offset]) > subpixelThreshold {
+                differentPixelCount += 1
+                if differentPixelCount > threshold {
+                    return false
+                }
+            }
+            offset += 1
+        }
+        return true
+    }
+
+    func diff(to other: NSImage) -> NSImage {
+        let oldCiImage = CIImage(cgImage: cgImage(forProposedRect: nil, context: nil, hints: nil)!) // swiftlint:disable:this force_unwrapping
+        let newCiImage = CIImage(cgImage: other.cgImage(forProposedRect: nil, context: nil, hints: nil)!) // swiftlint:disable:this force_unwrapping
+        let differenceFilter = CIFilter(name: "CIDifferenceBlendMode")! // swiftlint:disable:this force_unwrapping
+        differenceFilter.setValue(oldCiImage, forKey: kCIInputImageKey)
+        differenceFilter.setValue(newCiImage, forKey: kCIInputBackgroundImageKey)
+        let maxSize = CGSize(
+            width: max(size.width, other.size.width),
+            height: max(size.height, other.size.height)
+        )
+        let imageRep = NSCIImageRep(ciImage: differenceFilter.outputImage!) // swiftlint:disable:this force_unwrapping
+        let difference = NSImage(size: maxSize)
+        difference.addRepresentation(imageRep)
+        return difference
+    }
 }
 
 private func context(for cgImage: CGImage) -> CGContext? {
@@ -114,21 +138,5 @@ private func context(for cgImage: CGImage) -> CGContext? {
 
     context.draw(cgImage, in: CGRect(x: 0, y: 0, width: cgImage.width, height: cgImage.height))
     return context
-}
-
-private func diff(_ old: NSImage, _ new: NSImage) -> NSImage {
-    let oldCiImage = CIImage(cgImage: old.cgImage(forProposedRect: nil, context: nil, hints: nil)!) // swiftlint:disable:this force_unwrapping
-    let newCiImage = CIImage(cgImage: new.cgImage(forProposedRect: nil, context: nil, hints: nil)!) // swiftlint:disable:this force_unwrapping
-    let differenceFilter = CIFilter(name: "CIDifferenceBlendMode")! // swiftlint:disable:this force_unwrapping
-    differenceFilter.setValue(oldCiImage, forKey: kCIInputImageKey)
-    differenceFilter.setValue(newCiImage, forKey: kCIInputBackgroundImageKey)
-    let maxSize = CGSize(
-        width: max(old.size.width, new.size.width),
-        height: max(old.size.height, new.size.height)
-    )
-    let rep = NSCIImageRep(ciImage: differenceFilter.outputImage!) // swiftlint:disable:this force_unwrapping
-    let difference = NSImage(size: maxSize)
-    difference.addRepresentation(rep)
-    return difference
 }
 #endif
