@@ -64,8 +64,8 @@ private extension NSImage {
         guard oldCgImage.width == newCgImage.width else { return false }
         guard oldCgImage.height == newCgImage.height else { return false }
 
-        guard let oldContext = context(for: oldCgImage) else { return false }
-        guard let newContext = context(for: newCgImage) else { return false }
+        guard let oldContext = oldCgImage.cgContext else { return false }
+        guard let newContext = newCgImage.cgContext else { return false }
 
         guard let oldData = oldContext.data else { return false }
         guard let newData = newContext.data else { return false }
@@ -76,7 +76,7 @@ private extension NSImage {
         let newer = NSImage(data: other.pngRepresentation!)! // swiftlint:disable:this force_unwrapping
 
         guard let newerCgImage = newer.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return false }
-        guard let newerContext = context(for: newerCgImage) else { return false }
+        guard let newerContext = newerCgImage.cgContext else { return false }
         guard let newerData = newerContext.data else { return false }
 
         if memcmp(oldData, newerData, byteCount) == 0 { return true }
@@ -122,21 +122,23 @@ private extension NSImage {
     }
 }
 
-private func context(for cgImage: CGImage) -> CGContext? {
-    guard
-        let space = cgImage.colorSpace,
-        let context = CGContext(
-            data: nil,
-            width: cgImage.width,
-            height: cgImage.height,
-            bitsPerComponent: cgImage.bitsPerComponent,
-            bytesPerRow: cgImage.bytesPerRow,
-            space: space,
-            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-        )
-    else { return nil }
+private extension CGImage {
+    var cgContext: CGContext? {
+        guard
+            let space = colorSpace,
+            let context = CGContext(
+                data: nil,
+                width: width,
+                height: height,
+                bitsPerComponent: bitsPerComponent,
+                bytesPerRow: bytesPerRow,
+                space: space,
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            )
+        else { return nil }
 
-    context.draw(cgImage, in: CGRect(x: 0, y: 0, width: cgImage.width, height: cgImage.height))
-    return context
+        context.draw(self, in: CGRect(x: 0, y: 0, width: width, height: height))
+        return context
+    }
 }
 #endif
