@@ -16,15 +16,29 @@ public extension Diffing where Value == NSImage {
             toData: { $0.pngRepresentation! }, // swiftlint:disable:this force_unwrapping
             fromData: { NSImage(data: $0)! }, // swiftlint:disable:this force_unwrapping
             diff: { old, new in
-                guard !old.compare(to: new, precision: precision, subpixelThreshold: subpixelThreshold) else { return nil }
-                let difference = old.diff(to: new)
-                let message = new.size == old.size
-                    ? "Newly-taken snapshot does not match reference."
-                    : "Newly-taken snapshot@\(new.size) does not match reference@\(old.size)."
-                return (
-                    message,
-                    [XCTAttachment(image: old), XCTAttachment(image: new), XCTAttachment(image: difference)]
-                )
+                func attachments(_ old: NSImage, _ new: NSImage) -> [XCTAttachment] {
+                    [
+                        XCTAttachment(image: old),
+                        XCTAttachment(image: new),
+                        XCTAttachment(image: old.diff(to: new))
+                    ]
+                }
+
+                let result = old.compare(to: new, precision: precision, subpixelThreshold: subpixelThreshold)
+                switch result {
+                case .cgContextFailure, .cgContextDataFailure, .cgImageFailure:
+                    return ("Core Graphics failure", [])
+                case .isEqual, .isSimilar:
+                    return nil
+                case .isUnequal:
+                    return ("Snapshot is unequal", attachments(old, new))
+                case .isNotSimilar:
+                    return ("Snapshot is not similar", attachments(old, new))
+                case let .unequalWidth(lhs, rhs):
+                    return ("Snapshot width of \(rhs) is unequal to expected \(lhs)", attachments(old, new))
+                case let .unequalHeight(lhs, rhs):
+                    return ("Snapshot height of \(rhs) is unequal to expected \(lhs)", attachments(old, new))
+                }
             }
         )
     }
@@ -48,6 +62,18 @@ public extension Snapshotting where Value == NSImage, Format == NSImage {
     }
 }
 
+private enum ImageComparisonResult {
+    case cgContextDataFailure
+    case cgContextFailure
+    case cgImageFailure
+    case isEqual
+    case isNotSimilar
+    case isSimilar
+    case isUnequal
+    case unequalWidth(Int, Int)
+    case unequalHeight(Int, Int)
+}
+
 private extension NSImage {
     var pngRepresentation: Data? {
         guard let cgImage = cgImage(forProposedRect: nil, context: nil, hints: nil) else { return nil }
@@ -57,30 +83,38 @@ private extension NSImage {
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    func compare(to other: NSImage, precision: Float, subpixelThreshold: UInt8) -> Bool {
-        guard let oldCgImage = cgImage(forProposedRect: nil, context: nil, hints: nil) else { return false }
-        guard let newCgImage = other.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return false }
+    func compare(to other: NSImage, precision: Float, subpixelThreshold: UInt8) -> ImageComparisonResult {
+        guard let oldCgImage = cgImage(forProposedRect: nil, context: nil, hints: nil),
+              let newCgImage = other.cgImage(forProposedRect: nil, context: nil, hints: nil)
+        else { return .cgImageFailure }
 
-        guard oldCgImage.width == newCgImage.width else { return false }
-        guard oldCgImage.height == newCgImage.height else { return false }
+        guard oldCgImage.width == newCgImage.width else {
+            return .unequalWidth(oldCgImage.width, newCgImage.width)
+        }
 
-        guard let oldContext = oldCgImage.cgContext else { return false }
-        guard let newContext = newCgImage.cgContext else { return false }
+        guard oldCgImage.height == newCgImage.height else {
+            return .unequalHeight(oldCgImage.height, oldCgImage.height)
+        }
 
-        guard let oldData = oldContext.data else { return false }
-        guard let newData = newContext.data else { return false }
+        guard let oldContext = oldCgImage.cgContext, let newContext = newCgImage.cgContext else {
+            return .cgContextFailure
+        }
+
+        guard let oldData = oldContext.data, let newData = newContext.data else {
+            return .cgContextDataFailure
+        }
 
         let byteCount = oldContext.height * oldContext.bytesPerRow
-        if memcmp(oldData, newData, byteCount) == 0 { return true }
+        if memcmp(oldData, newData, byteCount) == 0 { return .isEqual }
 
         let newer = NSImage(data: other.pngRepresentation!)! // swiftlint:disable:this force_unwrapping
 
-        guard let newerCgImage = newer.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return false }
-        guard let newerContext = newerCgImage.cgContext else { return false }
-        guard let newerData = newerContext.data else { return false }
+        guard let newerCgImage = newer.cgImage(forProposedRect: nil, context: nil, hints: nil) else { return .cgImageFailure }
+        guard let newerContext = newerCgImage.cgContext else { return .cgContextFailure }
+        guard let newerData = newerContext.data else { return .cgContextDataFailure }
 
-        if memcmp(oldData, newerData, byteCount) == 0 { return true }
-        if precision >= 1 { return false }
+        if memcmp(oldData, newerData, byteCount) == 0 { return .isEqual }
+        if precision >= 1 { return .isUnequal }
 
         let oldRep = NSBitmapImageRep(cgImage: oldCgImage)
         let newRep = NSBitmapImageRep(cgImage: newerCgImage)
@@ -97,12 +131,12 @@ private extension NSImage {
             if oldBitmapData[offset].diff(between: newBitmapData[offset]) > subpixelThreshold {
                 differentPixelCount += 1
                 if differentPixelCount > threshold {
-                    return false
+                    return .isNotSimilar
                 }
             }
             offset += 1
         }
-        return true
+        return .isSimilar
     }
 
     func diff(to other: NSImage) -> NSImage {
