@@ -13,14 +13,20 @@ public extension Snapshotting where Value == CGPath, Format == NSImage {
     /// - Parameter subpixelThreshold: The byte-value threshold at which two subpixels are considered different.
     static func image(precision: Float = 1, subpixelThreshold: UInt8 = 0, drawingMode: CGPathDrawingMode = .eoFill) -> Snapshotting {
         SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold).pullback { path in
-            let bounds = path.boundingBoxOfPath
-            let image = NSImage(size: bounds.size)
-            image.lockFocus()
-            let context = NSGraphicsContext.current!.cgContext // swiftlint:disable:this force_unwrapping
+            let size = path.boundingBox.size
+            guard let context = CGContext(
+                data: nil,
+                width: Int(size.width),
+                height: Int(size.height),
+                bitsPerComponent: 8,
+                bytesPerRow: 4 * Int(size.height),
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue
+            ) else { return NSImage() }
             context.addPath(path)
             context.drawPath(using: drawingMode)
-            image.unlockFocus()
-            return image
+            guard let cgImage = context.makeImage() else { return NSImage() }
+            return NSImage(cgImage: cgImage, size: size)
         }
     }
 }
