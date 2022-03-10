@@ -46,6 +46,10 @@ snapshots_zip:
 	pushd $(SNAPSHOT_ARTIFACTS_PATH); zip -r snapshots * > /dev/null; popd
 	mv $(SNAPSHOT_ARTIFACTS_PATH)/snapshots.zip .
 
+xcresults_zip:
+	pushd $(DERIVED_DATA_PATH); zip -r xcresults *.xcresult > /dev/null; popd
+	mv $(DERIVED_DATA_PATH)/xcresults.zip .
+
 clean:
 	rm -rf $(DERIVED_DATA_PATH)
 	rm -rf *.xcodeproj
