@@ -35,6 +35,16 @@ jobs:
         run: make test-macos
       - name: Run tests on tvOS
         run: make test-tvos
+      - name: Zip XCResults
+        if: ${{ failure() }}
+        run: make xcresults_zip
+      - name: Upload XCResults
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: xcresults.zip
+          path: ./xcresults.zip
+          if-no-files-found: ignore
       - name: Zip snapshots
         if: ${{ failure() }}
         run: make snapshots_zip
