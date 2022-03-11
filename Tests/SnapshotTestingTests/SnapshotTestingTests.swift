@@ -207,20 +207,6 @@ final class SnapshotTestingTests: XCTestCase {
     }
 
     func testNSView() {
-        let button = NSButton()
-        button.appearance = NSAppearance(named: .aqua)
-        button.bezelStyle = .rounded
-        button.attributedTitle = .init(string: "Push Me", attributes: [
-            .font: NSFont.systemFont(ofSize: 12),
-            .foregroundColor: NSColor.black
-        ])
-        button.sizeToFit()
-
-        assertSnapshot(matching: button, as: .image)
-        assertSnapshot(matching: button, as: .recursiveDescription)
-    }
-
-    func testNSViewWithLayer() {
         let view = NSView()
         view.frame = CGRect(origin: .zero, size: .init(width: 10, height: 10))
         view.wantsLayer = true
