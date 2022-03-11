@@ -105,6 +105,10 @@ extension NSBezierPath {
             size: CGSize(width: scale, height: scale)
         ))
 
+        let origin = path.bounds.origin
+        let transform = AffineTransform(translationByX: -origin.x, byY: -origin.y)
+        path.transform(using: transform)
+
         return path
     }
 }
