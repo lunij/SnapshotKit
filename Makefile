@@ -1,6 +1,8 @@
 DERIVED_DATA_PATH = .derivedData
 SNAPSHOT_ARTIFACTS_PATH = /tmp/__SnapshotArtifacts__
-TEST_RESULTS = "$(DERIVED_DATA_PATH)/TestResults"
+TEST_RESULTS_IOS = "$(DERIVED_DATA_PATH)/TestResults_iOS"
+TEST_RESULTS_MACOS = "$(DERIVED_DATA_PATH)/TestResults_macOS"
+TEST_RESULTS_TVOS = "$(DERIVED_DATA_PATH)/TestResults_tvOS"
 
 xcodeproj:
 	PF_DEVELOP=1 swift run xcodegen
@@ -19,7 +21,7 @@ test-macos:
 		-scheme SnapshotTesting_macOS \
 		-destination platform="macOS" \
 		-derivedDataPath $(DERIVED_DATA_PATH) \
-		-resultBundlePath $(TEST_RESULTS) \
+		-resultBundlePath $(TEST_RESULTS_MACOS) \
 		| xcbeautify
 
 test-ios:
@@ -28,7 +30,7 @@ test-ios:
 		-scheme SnapshotTesting_iOS \
 		-destination platform="iOS Simulator,name=iPhone 11 Pro Max,OS=13.3" \
 		-derivedDataPath $(DERIVED_DATA_PATH) \
-		-resultBundlePath $(TEST_RESULTS) \
+		-resultBundlePath $(TEST_RESULTS_IOS) \
 		| xcbeautify
 
 test-tvos:
@@ -37,7 +39,7 @@ test-tvos:
 		-scheme SnapshotTesting_tvOS \
 		-destination platform="tvOS Simulator,name=Apple TV 4K,OS=13.3" \
 		-derivedDataPath $(DERIVED_DATA_PATH) \
-		-resultBundlePath $(TEST_RESULTS) \
+		-resultBundlePath $(TEST_RESULTS_TVOS) \
 		| xcbeautify
 
 test-apple-platforms: test-macos test-ios test-tvos
