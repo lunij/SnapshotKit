@@ -11,18 +11,25 @@ public extension Snapshotting where Value == NSBezierPath, Format == NSImage {
     ///
     /// - Parameter precision: The percentage of pixels that must match.
     /// - Parameter subpixelThreshold: The byte-value threshold at which two subpixels are considered different.
-    static func image(precision: Float = 1, subpixelThreshold: UInt8 = 0) -> Snapshotting {
+    static func image(precision: Float = 1, subpixelThreshold: UInt8 = 0, drawingMode: CGPathDrawingMode = .eoFill) -> Snapshotting {
         SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold).pullback { path in
-            // Move path info frame:
-            let bounds = path.bounds
-            let transform = AffineTransform(translationByX: -bounds.origin.x, byY: -bounds.origin.y)
-            path.transform(using: transform)
+            let size = path.bounds.size
 
-            let image = NSImage(size: path.bounds.size)
-            image.lockFocus()
-            path.fill()
-            image.unlockFocus()
-            return image
+            guard let context = CGContext(
+                data: nil,
+                width: Int(size.width),
+                height: Int(size.height),
+                bitsPerComponent: 8,
+                bytesPerRow: 4 * Int(size.height),
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue
+            ) else { return NSImage() }
+
+            context.addPath(path.cgPath)
+            context.drawPath(using: drawingMode)
+
+            guard let cgImage = context.makeImage() else { return NSImage() }
+            return NSImage(cgImage: cgImage, size: size)
         }
     }
 }
@@ -91,4 +98,29 @@ private let defaultNumberFormatter: NumberFormatter = {
     numberFormatter.locale = Locale(identifier: "en_US_POSIX")
     return numberFormatter
 }()
+
+private extension NSBezierPath {
+    var cgPath: CGPath {
+        let path = CGMutablePath()
+        var points = [CGPoint](repeating: .zero, count: 3)
+
+        for index in 0 ..< elementCount {
+            let type = element(at: index, associatedPoints: &points)
+            switch type {
+            case .moveTo:
+                path.move(to: points[0])
+            case .lineTo:
+                path.addLine(to: points[0])
+            case .curveTo:
+                path.addCurve(to: points[2], control1: points[0], control2: points[1])
+            case .closePath:
+                path.closeSubpath()
+            @unknown default:
+                continue
+            }
+        }
+
+        return path
+    }
+}
 #endif
