@@ -1003,7 +1003,7 @@ final class SnapshotTestingTests: XCTestCase {
 
         assertSnapshot(
             matching: webView,
-            as: .image(size: .init(width: 800, height: 600)),
+            as: .image(precision: 0.9, size: .init(width: 800, height: 600)),
             named: platform
         )
     }
@@ -1072,7 +1072,7 @@ final class SnapshotTestingTests: XCTestCase {
 
         assertSnapshot(
             matching: webView,
-            as: .image(size: .init(width: 800, height: 600)),
+            as: .image(precision: 0.9, size: .init(width: 800, height: 600)),
             named: platform
         )
 
