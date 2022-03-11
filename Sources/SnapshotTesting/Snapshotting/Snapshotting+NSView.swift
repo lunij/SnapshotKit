@@ -17,12 +17,21 @@ public extension Snapshotting where Value == NSView, Format == NSImage {
         SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold).asyncPullback { view in
             let initialSize = view.frame.size
             if let size = size { view.frame.size = size }
-            guard view.frame.width > 0, view.frame.height > 0 else {
-                fatalError("View not renderable to image at size \(view.frame.size)")
-            }
             return view.snapshot ?? Async { callback in
-                addImagesForRenderedViews(view).sequence().run { views in
-                    let bitmapRep = view.bitmapImageRepForCachingDisplay(in: view.bounds)! // swiftlint:disable:this force_unwrapping
+                view.addImagesForRenderedViews().sequence().run { views in
+                    guard let bitmapRep = NSBitmapImageRep(
+                        bitmapDataPlanes: nil,
+                        pixelsWide: Int(view.bounds.width),
+                        pixelsHigh: Int(view.bounds.height),
+                        bitsPerSample: 8,
+                        samplesPerPixel: 4,
+                        hasAlpha: true,
+                        isPlanar: false,
+                        colorSpaceName: .deviceRGB,
+                        bytesPerRow: 4 * Int(view.bounds.width),
+                        bitsPerPixel: 32
+                    ) else { return callback(NSImage()) }
+
                     view.cacheDisplay(in: view.bounds, to: bitmapRep)
                     let image = NSImage(size: view.bounds.size)
                     image.addRepresentation(bitmapRep)
