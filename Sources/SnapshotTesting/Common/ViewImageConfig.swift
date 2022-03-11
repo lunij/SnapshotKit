@@ -441,29 +441,27 @@ public extension ViewImageConfig {
 }
 #endif
 
-func addImagesForRenderedViews(_ view: View) -> [Async<View>] {
-    view.snapshot
-        .map { async in
+extension View {
+    func addImagesForRenderedViews() -> [Async<View>] {
+        snapshot.map { `async` in
             [
                 Async { callback in
-                    async.run { image in
+                    `async`.run { image in
                         let imageView = ImageView()
                         imageView.image = image
-                        imageView.frame = view.frame
+                        imageView.frame = self.frame
                         #if os(macOS)
-                        view.superview?.addSubview(imageView, positioned: .above, relativeTo: view)
+                        self.superview?.addSubview(imageView, positioned: .above, relativeTo: self)
                         #elseif os(iOS) || os(tvOS)
-                        view.superview?.insertSubview(imageView, aboveSubview: view)
+                        self.superview?.insertSubview(imageView, aboveSubview: self)
                         #endif
                         callback(imageView)
                     }
                 }
             ]
-        }
-        ?? view.subviews.flatMap(addImagesForRenderedViews)
-}
+        } ?? subviews.flatMap { $0.addImagesForRenderedViews() }
+    }
 
-extension View {
     var snapshot: Async<Image>? {
         func inWindow<T>(_ perform: () -> T) -> T {
             #if os(macOS)
@@ -613,7 +611,7 @@ func snapshotView(
     if config.safeArea == .zero { view.frame.origin = .init(x: offscreen, y: offscreen) }
 
     return (view.snapshot ?? Async { callback in
-        addImagesForRenderedViews(view).sequence().run { views in
+        view.addImagesForRenderedViews().sequence().run { views in
             callback(
                 renderer(bounds: view.bounds, for: traits).image { ctx in
                     if drawHierarchyInKeyWindow {
