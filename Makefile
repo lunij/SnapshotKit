@@ -37,7 +37,7 @@ test-tvos:
 	set -o pipefail && \
 		xcodebuild test \
 		-scheme SnapshotTesting_tvOS \
-		-destination platform="tvOS Simulator,name=Apple TV 4K,OS=13.3" \
+		-destination platform="tvOS Simulator,name=Apple TV 4K,OS=latest" \
 		-derivedDataPath $(DERIVED_DATA_PATH) \
 		-resultBundlePath $(TEST_RESULTS_TVOS) \
 		| xcbeautify

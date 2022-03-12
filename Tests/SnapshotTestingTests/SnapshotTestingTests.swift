@@ -529,12 +529,8 @@ final class SnapshotTestingTests: XCTestCase {
                 )
             }
             #elseif os(tvOS)
-            assertSnapshot(
-                matching: viewController, as: .image(on: .tv), named: "tv"
-            )
-            assertSnapshot(
-                matching: viewController, as: .image(on: .tv4K), named: "tv4k"
-            )
+            assertSnapshot(matching: viewController, as: .image(on: .tv), named: "tv")
+            assertSnapshot(matching: viewController, as: .image(on: .tv4K), named: "tv4k")
             #endif
         }
     }
@@ -1144,7 +1140,7 @@ final class SnapshotTestingTests: XCTestCase {
                     Text("Checked").fixedSize()
                 }
                 .padding(5)
-                .background(RoundedRectangle(cornerRadius: 5.0).fill(Color.blue))
+                .background(RoundedRectangle(cornerRadius: 5).fill(Color.blue))
                 .padding(10)
             }
         }
@@ -1152,7 +1148,7 @@ final class SnapshotTestingTests: XCTestCase {
 
         assertSnapshot(matching: view, as: .image())
         assertSnapshot(matching: view, as: .image(layout: .sizeThatFits), named: "size-that-fits")
-        assertSnapshot(matching: view, as: .image(layout: .fixed(width: 300.0, height: 100.0)), named: "fixed")
+        assertSnapshot(matching: view, as: .image(layout: .fixed(width: 300, height: 100)), named: "fixed")
         assertSnapshot(matching: view, as: .image(layout: .device(config: .tv)), named: "device")
     }
     #endif
