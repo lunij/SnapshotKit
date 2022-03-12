@@ -36,7 +36,6 @@ public extension Snapshotting where Value == NSBezierPath, Format == NSImage {
 
 public extension Snapshotting where Value == NSBezierPath, Format == String {
     /// A snapshot strategy for comparing bezier paths based on pixel equality.
-    @available(iOS 11.0, *)
     static var elementsDescription: Snapshotting {
         .elementsDescription(numberFormatter: defaultNumberFormatter)
     }
@@ -44,7 +43,6 @@ public extension Snapshotting where Value == NSBezierPath, Format == String {
     /// A snapshot strategy for comparing bezier paths based on pixel equality.
     ///
     /// - Parameter numberFormatter: The number formatter used for formatting points.
-    @available(iOS 11.0, *)
     static func elementsDescription(numberFormatter: NumberFormatter) -> Snapshotting {
         let namesByType: [NSBezierPath.ElementType: String] = [
             .moveTo: "MoveTo",
