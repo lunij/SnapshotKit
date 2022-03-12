@@ -74,3 +74,7 @@ fastlane/test_output
 
 # XcodeGen
 *.xcodeproj
+*.xcworkspace
+
+# Tuist
+Derived/

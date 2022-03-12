@@ -1,0 +1,25 @@
+{
+  "configurations" : [
+    {
+      "id" : "992BD109-4A12-4210-9B6B-4CED4198F2AA",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "SnapshotTestingTests",
+        "name" : "SnapshotTestingTests"
+      }
+    }
+  ],
+  "version" : 1
+}
