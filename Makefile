@@ -28,7 +28,7 @@ test-ios:
 	set -o pipefail && \
 		xcodebuild test \
 		-scheme SnapshotTesting_iOS \
-		-destination platform="iOS Simulator,name=iPhone 11 Pro Max,OS=13.3" \
+		-destination platform="iOS Simulator,name=iPhone 12,OS=latest" \
 		-derivedDataPath $(DERIVED_DATA_PATH) \
 		-resultBundlePath $(TEST_RESULTS_IOS) \
 		| xcbeautify
