@@ -6,8 +6,8 @@ let package = Package(
     name: "swift-snapshot-testing",
     platforms: [
         .iOS(.v11),
-        .macOS(.v10_10),
-        .tvOS(.v10)
+        .macOS(.v10_13),
+        .tvOS(.v11)
     ],
     products: [
         .library(
