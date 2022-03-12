@@ -101,20 +101,13 @@ public extension Snapshotting where Value: SwiftUI.View, Format == UIImage {
             config = .init(safeArea: .zero, size: size)
         }
 
-        return SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold, scale: 1).asyncPullback { view in
+        return SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold, scale: 1).asyncPullback { view -> Async<UIImage> in
             var config = config
 
-            let controller: WKInterfaceController
+            let controller = WKHostingController()
+            controller.body = view
 
-            if config.size != nil {
-                controller = WKHostingController(rootView: view)
-            } else {
-                let hostingController = WKHostingController(rootView: view)
-                config.size = hostingController.sizeThatFits(in: .zero)
-                controller = hostingController
-            }
-
-            return snapshotView(
+            return view.snapshot(
                 config: config,
                 drawHierarchyInKeyWindow: drawHierarchyInKeyWindow,
                 viewController: controller
