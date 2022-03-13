@@ -7,6 +7,8 @@ import SceneKit
 #endif
 #if canImport(SpriteKit)
 import SpriteKit
+#endif
+#if canImport(SwiftUI)
 import SwiftUI
 #endif
 #if canImport(WebKit)
@@ -1072,42 +1074,28 @@ final class SnapshotTestingTests: XCTestCase {
     #if os(iOS)
     @available(iOS 13.0, *)
     func testSwiftUIView_iOS() {
-        struct MyView: SwiftUI.View {
-            var body: some SwiftUI.View {
-                HStack {
-                    Image(systemName: "checkmark.circle.fill")
-                    Text("Checked").fixedSize()
-                }
-                .padding(5)
-                .background(RoundedRectangle(cornerRadius: 5.0).fill(Color.blue))
-                .padding(10)
-            }
-        }
-
-        let view = MyView().background(Color.yellow)
+        let view = TestView().environment(\.colorScheme, .light)
 
         assertSnapshot(matching: view, as: .image(traits: .init(userInterfaceStyle: .light)))
         assertSnapshot(matching: view, as: .image(layout: .sizeThatFits, traits: .init(userInterfaceStyle: .light)), named: "size-that-fits")
-        assertSnapshot(matching: view, as: .image(layout: .fixed(width: 200.0, height: 100.0), traits: .init(userInterfaceStyle: .light)), named: "fixed")
+        assertSnapshot(matching: view, as: .image(layout: .fixed(width: 200, height: 100), traits: .init(userInterfaceStyle: .light)), named: "fixed")
         assertSnapshot(matching: view, as: .image(layout: .device(config: .iPhoneSe), traits: .init(userInterfaceStyle: .light)), named: "device")
+    }
+    #endif
+
+    #if os(macOS)
+    @available(macOS 11.0, *)
+    func testSwiftUIView_macOS() {
+        let view = TestView().environment(\.colorScheme, .light)
+
+        assertSnapshot(matching: view, as: .image(size: .init(width: 100, height: 50), precision: 0.98))
     }
     #endif
 
     #if os(tvOS)
     @available(tvOS 13.0, *)
     func testSwiftUIView_tvOS() {
-        struct MyView: SwiftUI.View {
-            var body: some SwiftUI.View {
-                HStack {
-                    Image(systemName: "checkmark.circle.fill")
-                    Text("Checked").fixedSize()
-                }
-                .padding(5)
-                .background(RoundedRectangle(cornerRadius: 5).fill(Color.blue))
-                .padding(10)
-            }
-        }
-        let view = MyView().background(Color.yellow)
+        let view = TestView().environment(\.colorScheme, .light)
 
         assertSnapshot(matching: view, as: .image())
         assertSnapshot(matching: view, as: .image(layout: .sizeThatFits), named: "size-that-fits")
@@ -1116,6 +1104,22 @@ final class SnapshotTestingTests: XCTestCase {
     }
     #endif
 }
+
+#if canImport(SwiftUI)
+@available(iOS 13.0, macOS 11.0, tvOS 13.0, *)
+private struct TestView: SwiftUI.View {
+    var body: some SwiftUI.View {
+        HStack {
+            SwiftUI.Image(systemName: "checkmark.circle.fill")
+            Text("Checked").fixedSize()
+        }
+        .padding(5)
+        .background(RoundedRectangle(cornerRadius: 5).fill(Color.blue))
+        .padding(10)
+        .background(Color.yellow)
+    }
+}
+#endif
 
 #if os(iOS)
 private let allContentSizes =
