@@ -23,11 +23,10 @@ public extension Snapshotting where Value == UIViewController, Format == UIImage
         traits: UITraitCollection = .init()
     ) -> Snapshotting {
         SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold, scale: traits.displayScale).asyncPullback { viewController in
-            snapshotView(
+            viewController.view.snapshot(
                 config: size.map { .init(safeArea: config.safeArea, size: $0, traits: config.traits) } ?? config,
                 drawHierarchyInKeyWindow: false,
                 traits: traits,
-                view: viewController.view,
                 viewController: viewController
             )
         }
@@ -50,11 +49,10 @@ public extension Snapshotting where Value == UIViewController, Format == UIImage
         traits: UITraitCollection = .init()
     ) -> Snapshotting {
         SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold, scale: traits.displayScale).asyncPullback { viewController in
-            snapshotView(
+            viewController.view.snapshot(
                 config: .init(safeArea: .zero, size: size, traits: traits),
                 drawHierarchyInKeyWindow: drawHierarchyInKeyWindow,
                 traits: traits,
-                view: viewController.view,
                 viewController: viewController
             )
         }
@@ -65,11 +63,10 @@ public extension Snapshotting where Value == UIViewController, Format == String 
     /// A snapshot strategy for comparing view controllers based on their embedded controller hierarchy.
     static var hierarchy: Snapshotting {
         Snapshotting<String, String>.lines.pullback { viewController in
-            let dispose = prepareView(
+            let dispose = viewController.view.prepare(
                 config: .init(),
                 drawHierarchyInKeyWindow: false,
                 traits: .init(),
-                view: viewController.view,
                 viewController: viewController
             )
             defer { dispose() }
@@ -96,11 +93,10 @@ public extension Snapshotting where Value == UIViewController, Format == String 
         traits: UITraitCollection = .init()
     ) -> Snapshotting<UIViewController, String> {
         SimplySnapshotting.lines.pullback { viewController in
-            let dispose = prepareView(
+            let dispose = viewController.view.prepare(
                 config: .init(safeArea: config.safeArea, size: size ?? config.size, traits: config.traits),
                 drawHierarchyInKeyWindow: false,
                 traits: traits,
-                view: viewController.view,
                 viewController: viewController
             )
             defer { dispose() }

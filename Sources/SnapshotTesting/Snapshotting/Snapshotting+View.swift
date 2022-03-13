@@ -70,11 +70,10 @@ public extension Snapshotting where Value: SwiftUI.View, Format == UIImage {
                 controller = hostingController
             }
 
-            return snapshotView(
+            return controller.view.snapshot(
                 config: config,
                 drawHierarchyInKeyWindow: drawHierarchyInKeyWindow,
                 traits: traits,
-                view: controller.view,
                 viewController: controller
             )
         }
