@@ -24,11 +24,10 @@ public extension Snapshotting where Value == UIView, Format == UIImage {
         traits: UITraitCollection = .init()
     ) -> Snapshotting {
         SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold, scale: traits.displayScale).asyncPullback { view in
-            snapshotView(
+            view.snapshot(
                 config: .init(safeArea: .zero, size: size ?? view.frame.size, traits: .init()),
                 drawHierarchyInKeyWindow: drawHierarchyInKeyWindow,
                 traits: traits,
-                view: view,
                 viewController: .init()
             )
         }
@@ -47,11 +46,10 @@ public extension Snapshotting where Value == UIView, Format == String {
         traits: UITraitCollection = .init()
     ) -> Snapshotting<UIView, String> {
         SimplySnapshotting.lines.pullback { view in
-            let dispose = prepareView(
+            let dispose = view.prepare(
                 config: .init(safeArea: .zero, size: size ?? view.frame.size, traits: traits),
                 drawHierarchyInKeyWindow: false,
                 traits: .init(),
-                view: view,
                 viewController: .init()
             )
             defer { dispose() }
