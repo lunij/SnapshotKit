@@ -58,15 +58,10 @@ public extension Snapshotting where Value: SwiftUI.View, Format == UIImage {
             let controller: UIViewController
 
             if config.size != nil {
-                controller = UIHostingController(
-                    rootView: view
-                )
+                controller = UIHostingController(rootView: view)
             } else {
                 let hostingController = UIHostingController(rootView: view)
-
-                let maxSize = CGSize(width: 0.0, height: 0.0)
-                config.size = hostingController.sizeThatFits(in: maxSize)
-
+                config.size = hostingController.sizeThatFits(in: .zero)
                 controller = hostingController
             }
 
@@ -76,6 +71,46 @@ public extension Snapshotting where Value: SwiftUI.View, Format == UIImage {
                 traits: traits,
                 viewController: controller
             )
+        }
+    }
+}
+#elseif os(macOS)
+@available(macOS 11.0, *)
+public extension Snapshotting where Value: SwiftUI.View, Format == NSImage {
+    /// A snapshot strategy for comparing SwiftUI Views based on pixel equality.
+    ///
+    /// - Parameters:
+    ///   - size: The size of the view.
+    ///   - precision: The percentage of pixels that must match.
+    ///   - subpixelThreshold: The byte-value threshold at which two subpixels are considered different.
+    static func image(
+        size: CGSize,
+        precision: Float = 1,
+        subpixelThreshold: UInt8 = 0
+    ) -> Snapshotting {
+        return SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold).asyncPullback { view in
+            let hostingView = NSHostingView(rootView: view)
+            hostingView.frame.size = size
+
+            return Async { callback in
+                guard let bitmapRep = NSBitmapImageRep(
+                    bitmapDataPlanes: nil,
+                    pixelsWide: Int(hostingView.bounds.width),
+                    pixelsHigh: Int(hostingView.bounds.height),
+                    bitsPerSample: 8,
+                    samplesPerPixel: 4,
+                    hasAlpha: true,
+                    isPlanar: false,
+                    colorSpaceName: .deviceRGB,
+                    bytesPerRow: 4 * Int(hostingView.bounds.width),
+                    bitsPerPixel: 32
+                ) else { return callback(NSImage()) }
+
+                hostingView.cacheDisplay(in: hostingView.bounds, to: bitmapRep)
+                let image = NSImage(size: hostingView.bounds.size)
+                image.addRepresentation(bitmapRep)
+                callback(image)
+            }
         }
     }
 }
