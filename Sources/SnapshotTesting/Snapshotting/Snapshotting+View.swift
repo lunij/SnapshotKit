@@ -88,7 +88,7 @@ public extension Snapshotting where Value: SwiftUI.View, Format == NSImage {
         precision: Float = 1,
         subpixelThreshold: UInt8 = 0
     ) -> Snapshotting {
-        return SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold).asyncPullback { view in
+        SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold).asyncPullback { view in
             let hostingView = NSHostingView(rootView: view)
             hostingView.frame.size = size
 

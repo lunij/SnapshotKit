@@ -40,7 +40,6 @@ extension UIView {
         return dispose
     }
 
-
     func snapshot(
         config: ViewImageConfig,
         drawHierarchyInKeyWindow: Bool,

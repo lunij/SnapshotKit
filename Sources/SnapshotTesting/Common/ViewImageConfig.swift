@@ -441,10 +441,10 @@ public extension ViewImageConfig {
 
 extension View {
     func addImagesForRenderedViews() -> [Async<View>] {
-        snapshot.map { `async` in
+        snapshot.map { async in
             [
                 Async { callback in
-                    `async`.run { image in
+                    async.run { image in
                         let imageView = ImageView()
                         imageView.image = image
                         imageView.frame = self.frame
