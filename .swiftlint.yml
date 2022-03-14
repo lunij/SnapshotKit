@@ -18,7 +18,7 @@ opt_in_rules:
 excluded:
   - .build
   - .derivedData
-  - ./Tests/SnapshotTestingTests/__Snapshots__
+  - ./Tests/SnapshotKitTests/__Snapshots__
   - DerivedData
 file_name:
   excluded:

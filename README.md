@@ -1,8 +1,7 @@
-# 📸 SnapshotTesting
+# 📸 SnapshotKit
 
-[![Swift 5.1](https://img.shields.io/badge/swift-5.1-ED523F.svg?style=flat)](https://swift.org/download/)
+[![Swift 5.4](https://img.shields.io/badge/swift-5.1-ED523F.svg?style=flat)](https://swift.org/download/)
 [![CI](https://github.com/pointfreeco/swift-snapshot-testing/workflows/CI/badge.svg)](https://actions-badge.atrox.dev/pointfreeco/swift-snapshot-testing/goto)
-[![@pointfreeco](https://img.shields.io/badge/contact-@pointfreeco-5AA9E7.svg?style=flat)](https://twitter.com/pointfreeco)
 
 Delightful Swift snapshot testing.
 
@@ -12,10 +11,10 @@ Delightful Swift snapshot testing.
 
 ## Usage
 
-Once [installed](#installation), _no additional configuration is required_. You can import the `SnapshotTesting` module and call the `assertSnapshot` function.
+Once [installed](#installation), _no additional configuration is required_. You can import the `SnapshotKit` module and call the `assertSnapshot` function.
 
 ``` swift
-import SnapshotTesting
+import SnapshotKit
 import XCTest
 
 class MyViewControllerTests: XCTestCase {
@@ -50,7 +49,7 @@ assertSnapshot(matching: vc, as: .image)
 
 ## Snapshot Anything
 
-While most snapshot testing libraries in the Swift community are limited to `UIImage`s of `UIView`s, SnapshotTesting can work with _any_ format of _any_ value on _any_ Swift platform!
+While most snapshot testing libraries in the Swift community are limited to `UIImage`s of `UIView`s, SnapshotKit can work with _any_ format of _any_ value on _any_ Swift platform!
 
 The `assertSnapshot` function accepts a value and any snapshot strategy that value supports. This means that a [view](Documentation/Available-Snapshot-Strategies.md#uiview) or [view controller](Documentation/Available-Snapshot-Strategies.md#uiviewcontroller) can be tested against an image representation _and_ against a textual representation of its properties and subview hierarchy.
 
@@ -87,7 +86,7 @@ assertSnapshot(matching: vc, as: .recursiveDescription(on: .iPadMini(.portrait))
 > ```
 >
 
-Better yet, SnapshotTesting isn't limited to views and view controllers! There are [a number of available snapshot strategies](Documentation/Available-Snapshot-Strategies.md) to choose from.
+Better yet, SnapshotKit isn't limited to views and view controllers! There are [a number of available snapshot strategies](Documentation/Available-Snapshot-Strategies.md) to choose from.
 
 For example, you can snapshot test URL requests (_e.g._, those that your API client prepares).
 
@@ -134,63 +133,43 @@ assertSnapshot(matching: user, as: .dump)
 //   - name: "Blobby"
 ```
 
-If your data can be represented as an image, text, or data, you can write a snapshot test for it! Check out [all of the snapshot strategies](Documentation/Available-Snapshot-Strategies.md) that ship with SnapshotTesting and [learn how to define your own custom strategies](Documentation/Defining-Custom-Snapshot-Strategies.md).
+If your data can be represented as an image, text, or data, you can write a snapshot test for it! Check out [all of the snapshot strategies](Documentation/Available-Snapshot-Strategies.md) that ship with SnapshotKit and [learn how to define your own custom strategies](Documentation/Defining-Custom-Snapshot-Strategies.md).
 
 ## Installation
 
 ### Xcode 11
 
-> ⚠️ Warning: By default, Xcode will try to add the SnapshotTesting package to your project's main application/framework target. Please ensure that SnapshotTesting is added to a _test_ target instead, as documented in the last step, below.
+> ⚠️ Warning: By default, Xcode will try to add the SnapshotKit package to your project's main application/framework target. Please ensure that SnapshotKit is added to a _test_ target instead, as documented in the last step, below.
 
  1. From the **File** menu, navigate through **Swift Packages** and select **Add Package Dependency…**.
  2. Enter package repository URL: `https://github.com/pointfreeco/swift-snapshot-testing.git`
  3. Confirm the version and let Xcode resolve the package
- 4. On the final dialog, update SnapshotTesting's **Add to Target** column to a test target that will contain snapshot tests (if you have more than one test target, you can later add SnapshotTesting to them by manually linking the library in its build phase)
+ 4. On the final dialog, update SnapshotKit's **Add to Target** column to a test target that will contain snapshot tests (if you have more than one test target, you can later add SnapshotKit to them by manually linking the library in its build phase)
 
 ### Swift Package Manager
 
-If you want to use SnapshotTesting in any other project that uses [SwiftPM](https://swift.org/package-manager/), add the package as a dependency in `Package.swift`:
+If you want to use SnapshotKit in any other project that uses [SwiftPM](https://swift.org/package-manager/), add the package as a dependency in `Package.swift`:
 
 ```swift
 dependencies: [
-  .package(
-    url: "https://github.com/pointfreeco/swift-snapshot-testing.git",
-    from: "1.9.0"
-  ),
+    .package(url: "https://github.com/lunij/SnapshotKit.git", from: "1.0.0")
 ]
 ```
 
-Next, add `SnapshotTesting` as a dependency of your test target:
+Next, add `SnapshotKit` as a dependency of your test target:
 
 ```swift
 targets: [
-  .target(name: "MyApp"),
-  .testTarget(
-    name: "MyAppTests",
-    dependencies: [
-      "MyApp",
-      .product(name: "SnapshotTesting", package: "swift-snapshot-testing"),
-    ]
-  )
+    .target(name: "MyApp"),
+    .testTarget(
+        name: "MyAppTests",
+        dependencies: [
+            "MyApp",
+            .product(name: "SnapshotKit", package: "SnapshotKit")
+        ]
+    )
 ]
 ```
-
-### Carthage
-
-If you use [Carthage](https://github.com/Carthage/Carthage), you can add the following dependency to your `Cartfile`:
-
-``` ruby
-github "pointfreeco/swift-snapshot-testing" ~> 1.9.0
-```
-
-> ⚠️ Warning: Carthage instructs you to drag frameworks into your Xcode project. Xcode may automatically attempt to link these frameworks to your app target. `SnapshotTesting.framework` is only compatible with test targets, so when you first add it to your project:
->
->  1. Remove `SnapshotTesting.framework` from any non-test target it may have been added to.
->  2. Add `SnapshotTesting.framework` to any applicable test targets.
->  3. Add a **New Copy Build Phase** to any applicable test targets with **Destination** set to "Frameworks", and add `SnapshotTesting.framework` as an item to this phase.
->  4. Do _not_ add `SnapshotTesting.framework` to the "Input Files" or "Output Files" of your app target's Carthage `copy-frameworks` **Run Script Phase**.
->
-> See Carthage's "[Adding frameworks to unit tests or a framework](https://github.com/Carthage/Carthage#adding-frameworks-to-unit-tests-or-a-framework)" documentation for more.
 
 ### CocoaPods
 
@@ -198,7 +177,7 @@ If your project uses [CocoaPods](https://cocoapods.org), add the pod to any appl
 
 ```ruby
 target 'MyAppTests' do
-  pod 'SnapshotTesting', '~> 1.9.0'
+    pod 'SnapshotKit', '~> 1.0.0'
 end
 ```
 
@@ -216,48 +195,28 @@ end
   - **`Codable` support**. Snapshot encodable data structures into their [JSON](Documentation/Available-Snapshot-Strategies.md#json) and [property list](Documentation/Available-Snapshot-Strategies.md#plist) representations.
   - **Custom diff tool integration**. Configure failure messages to print diff commands for [Kaleidoscope](https://kaleidoscope.app) (or your diff tool of choice).
     ``` swift
-    SnapshotTesting.diffTool = "ksdiff"
+    SnapshotKit.diffTool = "ksdiff"
     ```
 
 ## Plug-ins
 
-  - [swift-snapshot-testing-nimble](https://github.com/Killectro/swift-snapshot-testing-nimble) adds [Nimble](https://github.com/Quick/Nimble) matchers for SnapshotTesting.
-
   - [swift-html](https://github.com/pointfreeco/swift-html) is a Swift DSL for type-safe, extensible, and transformable HTML documents and includes an `HtmlSnapshotTesting` module to snapshot test its HTML documents.
-  
+
   - [GRDBSnapshotTesting](https://github.com/SebastianOsinski/GRDBSnapshotTesting) adds snapshot strategy for testing SQLite database migrations made with [GRDB](https://github.com/groue/GRDB.swift).
-  
+
   - [AccessibilitySnapshot](https://github.com/cashapp/AccessibilitySnapshot) adds easy regression testing for iOS accessibility.
 
   - [AccessibilitySnapshotColorBlindness](https://github.com/Sherlouk/AccessibilitySnapshotColorBlindness) adds snapshot strategies for color blindness simulation on iOS views, view controllers and images.
 
   - [swift-snapshot-testing-stitch](https://github.com/Sherlouk/swift-snapshot-testing-stitch/) adds the ability to stitch multiple UIView's or UIViewController's together in a single test.
 
-Have you written your own SnapshotTesting plug-in? [Add it here](https://github.com/pointfreeco/swift-snapshot-testing/edit/master/README.md) and submit a pull request!
-  
 ## Related Tools
 
-  - [`iOSSnapshotTestCase`](https://github.com/uber/ios-snapshot-test-case/) helped introduce screen shot testing to a broad audience in the iOS community. Experience with it inspired the creation of this library.
+    - [SnapshotTesting](https://github.com/pointfreeco/swift-snapshot-testing/) is the framework this one is based on.
 
-  - [Jest](https://jestjs.io) brought generalized snapshot testing to the JavaScript community with a polished user experience. Several features of this library (diffing, automatically capturing new snapshots) were directly influenced.
+    - [`iOSSnapshotTestCase`](https://github.com/uber/ios-snapshot-test-case/) helped introduce screen shot testing to a broad audience in the iOS community.
 
-## Learn More
-
-SnapshotTesting was designed with [witness-oriented programming](https://www.pointfree.co/episodes/ep39-witness-oriented-library-design).
-
-This concept (and more) are explored thoroughly in a series of episodes on [Point-Free](https://www.pointfree.co), a video series exploring functional programming and Swift hosted by [Brandon Williams](https://twitter.com/mbrandonw) and [Stephen Celis](https://twitter.com/stephencelis).
-
-Witness-oriented programming and the design of this library was explored in the following [Point-Free](https://www.pointfree.co) episodes:
-
-  - [Episode 33](https://www.pointfree.co/episodes/ep33-protocol-witnesses-part-1): Protocol Witnesses: Part 1
-  - [Episode 34](https://www.pointfree.co/episodes/ep34-protocol-witnesses-part-1): Protocol Witnesses: Part 2
-  - [Episode 35](https://www.pointfree.co/episodes/ep35-advanced-protocol-witnesses-part-1): Advanced Protocol Witnesses: Part 1
-  - [Episode 36](https://www.pointfree.co/episodes/ep36-advanced-protocol-witnesses-part-2): Advanced Protocol Witnesses: Part 2
-  - [Episode 37](https://www.pointfree.co/episodes/ep37-protocol-oriented-library-design-part-1): Protocol-Oriented Library Design: Part 1
-  - [Episode 38](https://www.pointfree.co/episodes/ep38-protocol-oriented-library-design-part-2): Protocol-Oriented Library Design: Part 2
-  - [Episode 39](https://www.pointfree.co/episodes/ep39-witness-oriented-library-design): Witness-Oriented Library Design
-  - [Episode 40](https://www.pointfree.co/episodes/ep40-async-functional-refactoring): Async Functional Refactoring
-  - [Episode 41](https://www.pointfree.co/episodes/ep41-a-tour-of-snapshot-testing): A Tour of Snapshot Testing 🆓
+    - [Jest](https://jestjs.io) brought generalized snapshot testing to the JavaScript community with a polished user experience. Several features of this library (diffing, automatically capturing new snapshots) were directly influenced.
 
 <a href="https://www.pointfree.co/episodes/ep41-a-tour-of-snapshot-testing">
   <img alt="video poster image" src="https://d1hf1soyumxcgv.cloudfront.net/0041-tour-of-snapshot-testing/0041-poster.jpg" width="480">

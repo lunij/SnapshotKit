@@ -3,7 +3,7 @@ import Foundation
 import PackageDescription
 
 let package = Package(
-    name: "swift-snapshot-testing",
+    name: "SnapshotKit",
     platforms: [
         .iOS(.v11),
         .macOS(.v10_13),
@@ -11,18 +11,18 @@ let package = Package(
     ],
     products: [
         .library(
-            name: "SnapshotTesting",
-            targets: ["SnapshotTesting"]
+            name: "SnapshotKit",
+            targets: ["SnapshotKit"]
         )
     ],
     targets: [
         .target(
-            name: "SnapshotTesting",
+            name: "SnapshotKit",
             dependencies: []
         ),
         .testTarget(
-            name: "SnapshotTestingTests",
-            dependencies: ["SnapshotTesting"],
+            name: "SnapshotKitTests",
+            dependencies: ["SnapshotKit"],
             exclude: [
                 "__Fixtures__",
                 "__Snapshots__"
@@ -30,11 +30,3 @@ let package = Package(
         )
     ]
 )
-
-if ProcessInfo.processInfo.environment.keys.contains("PF_DEVELOP") {
-    package.dependencies.append(
-        contentsOf: [
-            .package(url: "https://github.com/yonaskolb/XcodeGen.git", .exact("2.15.1"))
-        ]
-    )
-}

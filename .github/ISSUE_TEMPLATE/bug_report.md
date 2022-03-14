@@ -25,7 +25,7 @@ Give a clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Environment**
-  - swift-snapshot-testing version [e.g. 1.9.0]
+  - SnapshotKit version [e.g. 1.9.0]
   - Xcode [e.g. 13.2]
   - Swift [e.g. 5.5]
   - OS: [e.g. iOS 15]
