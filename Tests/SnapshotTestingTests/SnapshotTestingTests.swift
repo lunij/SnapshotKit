@@ -683,7 +683,7 @@ final class SnapshotTestingTests: XCTestCase {
         gradientLayer.colors = [UIColor.red.cgColor, UIColor.yellow.cgColor]
         gradientLayer.frame = baseLayer.frame
         baseLayer.addSublayer(gradientLayer)
-        assertSnapshot(matching: baseLayer, as: .image)
+        assertSnapshot(matching: baseLayer, as: .image(subpixelThreshold: 1))
     }
 
     func testViewControllerHierarchy() {
