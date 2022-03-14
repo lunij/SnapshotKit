@@ -389,53 +389,6 @@ final class SnapshotTestingTests: XCTestCase {
     #endif
 
     #if os(iOS)
-    func testTraitsEmbeddedInTabNavigation() {
-        let testViewController = TestViewController()
-        let navController = UINavigationController(rootViewController: testViewController)
-        let viewController = UITabBarController()
-        viewController.setViewControllers([navController], animated: false)
-        let precision: Float = 0.99
-
-        assertSnapshot(matching: viewController, as: .image(on: .iPhoneSe, precision: precision), named: "iphone-se")
-        assertSnapshot(matching: viewController, as: .image(on: .iPhone8, precision: precision), named: "iphone-8")
-        assertSnapshot(matching: viewController, as: .image(on: .iPhone8Plus, precision: precision), named: "iphone-8-plus")
-        assertSnapshot(matching: viewController, as: .image(on: .iPhoneX, precision: precision), named: "iphone-x")
-        assertSnapshot(matching: viewController, as: .image(on: .iPhoneXr, precision: precision), named: "iphone-xr")
-        assertSnapshot(matching: viewController, as: .image(on: .iPhoneXsMax, precision: precision), named: "iphone-xs-max")
-        assertSnapshot(matching: viewController, as: .image(on: .iPadMini, precision: precision), named: "ipad-mini")
-        assertSnapshot(matching: viewController, as: .image(on: .iPad9_7, precision: precision), named: "ipad-9-7")
-        assertSnapshot(matching: viewController, as: .image(on: .iPad10_2, precision: precision), named: "ipad-10-2")
-        assertSnapshot(matching: viewController, as: .image(on: .iPadPro10_5, precision: precision), named: "ipad-pro-10-5")
-        assertSnapshot(matching: viewController, as: .image(on: .iPadPro11, precision: precision), named: "ipad-pro-11")
-        assertSnapshot(matching: viewController, as: .image(on: .iPadPro12_9, precision: precision), named: "ipad-pro-12-9")
-
-        assertSnapshot(matching: viewController, as: .image(on: .iPhoneSe(.portrait), precision: precision), named: "iphone-se")
-        assertSnapshot(matching: viewController, as: .image(on: .iPhone8(.portrait), precision: precision), named: "iphone-8")
-        assertSnapshot(matching: viewController, as: .image(on: .iPhone8Plus(.portrait), precision: precision), named: "iphone-8-plus")
-        assertSnapshot(matching: viewController, as: .image(on: .iPhoneX(.portrait), precision: precision), named: "iphone-x")
-        assertSnapshot(matching: viewController, as: .image(on: .iPhoneXr(.portrait), precision: precision), named: "iphone-xr")
-        assertSnapshot(matching: viewController, as: .image(on: .iPhoneXsMax(.portrait), precision: precision), named: "iphone-xs-max")
-        assertSnapshot(matching: viewController, as: .image(on: .iPadMini(.landscape), precision: precision), named: "ipad-mini")
-        assertSnapshot(matching: viewController, as: .image(on: .iPad9_7(.landscape), precision: precision), named: "ipad-9-7")
-        assertSnapshot(matching: viewController, as: .image(on: .iPad10_2(.landscape), precision: precision), named: "ipad-10-2")
-        assertSnapshot(matching: viewController, as: .image(on: .iPadPro10_5(.landscape), precision: precision), named: "ipad-pro-10-5")
-        assertSnapshot(matching: viewController, as: .image(on: .iPadPro11(.landscape), precision: precision), named: "ipad-pro-11")
-        assertSnapshot(matching: viewController, as: .image(on: .iPadPro12_9(.landscape), precision: precision), named: "ipad-pro-12-9")
-
-        assertSnapshot(matching: viewController, as: .image(on: .iPhoneSe(.landscape), precision: precision), named: "iphone-se-alternative")
-        assertSnapshot(matching: viewController, as: .image(on: .iPhone8(.landscape), precision: precision), named: "iphone-8-alternative")
-        assertSnapshot(matching: viewController, as: .image(on: .iPhone8Plus(.landscape), precision: precision), named: "iphone-8-plus-alternative")
-        assertSnapshot(matching: viewController, as: .image(on: .iPhoneX(.landscape), precision: precision), named: "iphone-x-alternative")
-        assertSnapshot(matching: viewController, as: .image(on: .iPhoneXr(.landscape), precision: precision), named: "iphone-xr-alternative")
-        assertSnapshot(matching: viewController, as: .image(on: .iPhoneXsMax(.landscape), precision: precision), named: "iphone-xs-max-alternative")
-        assertSnapshot(matching: viewController, as: .image(on: .iPadMini(.portrait), precision: precision), named: "ipad-mini-alternative")
-        assertSnapshot(matching: viewController, as: .image(on: .iPad9_7(.portrait), precision: precision), named: "ipad-9-7-alternative")
-        assertSnapshot(matching: viewController, as: .image(on: .iPad10_2(.portrait), precision: precision), named: "ipad-10-2-alternative")
-        assertSnapshot(matching: viewController, as: .image(on: .iPadPro10_5(.portrait), precision: precision), named: "ipad-pro-10-5-alternative")
-        assertSnapshot(matching: viewController, as: .image(on: .iPadPro11(.portrait), precision: precision), named: "ipad-pro-11-alternative")
-        assertSnapshot(matching: viewController, as: .image(on: .iPadPro12_9(.portrait), precision: precision), named: "ipad-pro-12-9-alternative")
-    }
-
     func testCollectionViewsWithMultipleScreenSizes() {
         final class CollectionViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
             let flowLayout: UICollectionViewFlowLayout = {
@@ -509,46 +462,6 @@ final class SnapshotTestingTests: XCTestCase {
             "iphone8": .image(on: .iPhone8),
             "iphoneMax": .image(on: .iPhoneXsMax)
         ])
-    }
-
-    func testTraitsWithView() {
-        let label = UILabel()
-        label.font = .preferredFont(forTextStyle: .title1)
-        label.adjustsFontForContentSizeCategory = true
-        label.text = "UILabel"
-
-        allContentSizes.forEach { name, contentSize in
-            assertSnapshot(
-                matching: label,
-                as: .image(precision: 0.97, traits: .init(preferredContentSizeCategory: contentSize)),
-                named: "label-\(name)"
-            )
-        }
-    }
-
-    func testTraitsWithViewController() {
-        let label = UILabel()
-        label.font = .preferredFont(forTextStyle: .title1)
-        label.adjustsFontForContentSizeCategory = true
-        label.text = "UILabel"
-
-        let viewController = UIViewController()
-        viewController.view.addSubview(label)
-
-        label.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            label.leadingAnchor.constraint(equalTo: viewController.view.layoutMarginsGuide.leadingAnchor),
-            label.topAnchor.constraint(equalTo: viewController.view.layoutMarginsGuide.topAnchor),
-            label.trailingAnchor.constraint(equalTo: viewController.view.layoutMarginsGuide.trailingAnchor)
-        ])
-
-        allContentSizes.forEach { name, contentSize in
-            assertSnapshot(
-                matching: viewController,
-                as: .recursiveDescription(on: .iPhoneSe, traits: .init(preferredContentSizeCategory: contentSize)),
-                named: "label-\(name)"
-            )
-        }
     }
 
     func testUIView() {
