@@ -1,6 +1,5 @@
 // swiftlint:disable file_length
 
-#if os(iOS) || os(macOS) || os(tvOS)
 #if os(macOS)
 import Cocoa
 #endif
@@ -54,6 +53,22 @@ public struct ViewImageConfig {
 }
 #endif
 
+#if os(watchOS)
+public struct ViewImageConfig {
+    public var safeArea: UIEdgeInsets
+    public var size: CGSize?
+
+    public init(
+        safeArea: UIEdgeInsets = .zero,
+        size: CGSize? = nil
+    ) {
+        self.safeArea = safeArea
+        self.size = size
+    }
+}
+#endif
+
+#if os(iOS) || os(macOS) || os(tvOS)
 extension View {
     func addImagesForRenderedViews() -> [Async<View>] {
         snapshot.map { async in
@@ -140,6 +155,7 @@ extension View {
     }
     #endif
 }
+#endif
 
 #if os(macOS)
 private final class ScaledWindow: NSWindow {
@@ -147,7 +163,6 @@ private final class ScaledWindow: NSWindow {
         2
     }
 }
-#endif
 #endif
 
 extension Array {

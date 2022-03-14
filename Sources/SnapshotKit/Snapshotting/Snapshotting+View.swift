@@ -4,7 +4,7 @@ import SwiftUI
 
 /// The size constraint for a snapshot (similar to `PreviewLayout`).
 public enum SwiftUISnapshotLayout {
-    #if os(iOS) || os(tvOS)
+    #if os(iOS) || os(tvOS) || os(watchOS)
     /// Center the view in a device container described by`config`.
     case device(config: ViewImageConfig)
     #endif
@@ -14,14 +14,15 @@ public enum SwiftUISnapshotLayout {
     case sizeThatFits
 }
 
-#if os(iOS) || os(tvOS)
-@available(iOS 13.0, tvOS 13.0, *)
+#if os(iOS) || os(tvOS) || os(watchOS)
+@available(iOS 13.0, tvOS 13.0, watchOS 6.0, *)
 public extension Snapshotting where Value: SwiftUI.View, Format == UIImage {
     /// A snapshot strategy for comparing SwiftUI Views based on pixel equality.
     static var image: Snapshotting {
         .image()
     }
 
+    #if os(iOS) || os(tvOS)
     /// A snapshot strategy for comparing SwiftUI Views based on pixel equality.
     ///
     /// - Parameters:
@@ -41,10 +42,8 @@ public extension Snapshotting where Value: SwiftUI.View, Format == UIImage {
         let config: ViewImageConfig
 
         switch layout {
-        #if os(iOS) || os(tvOS)
         case let .device(config: deviceConfig):
             config = deviceConfig
-        #endif
         case .sizeThatFits:
             config = .init(safeArea: .zero, size: nil, traits: traits)
         case let .fixed(width: width, height: height):
@@ -73,6 +72,56 @@ public extension Snapshotting where Value: SwiftUI.View, Format == UIImage {
             )
         }
     }
+    #endif
+
+    #if os(watchOS)
+    /// A snapshot strategy for comparing SwiftUI Views based on pixel equality.
+    ///
+    /// - Parameters:
+    ///   - drawHierarchyInKeyWindow: Utilize the simulator's key window in order to render `UIAppearance` and `UIVisualEffect`s.
+    ///                               This option requires a host application for your tests and will _not_ work for framework test targets.
+    ///   - precision: The percentage of pixels that must match.
+    ///   - subpixelThreshold: The byte-value threshold at which two subpixels are considered different.
+    ///   - size: A view size override.
+    static func image(
+        drawHierarchyInKeyWindow: Bool = false,
+        precision: Float = 1,
+        subpixelThreshold: UInt8 = 0,
+        layout: SwiftUISnapshotLayout = .sizeThatFits
+    ) -> Snapshotting {
+        let config: ViewImageConfig
+
+        switch layout {
+        case let .device(config: deviceConfig):
+            config = deviceConfig
+        case .sizeThatFits:
+            config = .init(safeArea: .zero, size: nil)
+        case let .fixed(width: width, height: height):
+            let size = CGSize(width: width, height: height)
+            config = .init(safeArea: .zero, size: size)
+        }
+
+        return SimplySnapshotting.image(precision: precision, subpixelThreshold: subpixelThreshold, scale: 1).asyncPullback { view in
+            var config = config
+
+            let controller: WKInterfaceController
+
+            if config.size != nil {
+                controller = WKHostingController(rootView: view)
+            } else {
+                let hostingController = WKHostingController(rootView: view)
+                config.size = hostingController.sizeThatFits(in: .zero)
+                controller = hostingController
+            }
+
+            return snapshotView(
+                config: config,
+                drawHierarchyInKeyWindow: drawHierarchyInKeyWindow,
+                viewController: controller
+            )
+        }
+    }
+    #endif
 }
 #elseif os(macOS)
 @available(macOS 11.0, *)

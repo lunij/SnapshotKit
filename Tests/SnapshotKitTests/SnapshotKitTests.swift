@@ -15,7 +15,7 @@ import SwiftUI
 import WebKit
 #endif
 #if canImport(UIKit)
-import UIKit.UIView
+import UIKit
 #endif
 import XCTest
 
@@ -838,6 +838,29 @@ final class SnapshotKitTests: XCTestCase {
         assertSnapshot(matching: view, as: .image(precision: precision, layout: .sizeThatFits), named: "size-that-fits")
         assertSnapshot(matching: view, as: .image(precision: precision, layout: .fixed(width: 300, height: 100)), named: "fixed")
         assertSnapshot(matching: view, as: .image(precision: precision, layout: .device(config: .tv)), named: "device")
+    }
+    #endif
+
+    #if os(watchOS)
+    @available(watchOS 6.0, *)
+    func testSwiftUIView_watchOS() {
+        struct MyView: SwiftUI.View {
+            var body: some SwiftUI.View {
+                HStack {
+                    Image(systemName: "checkmark.circle.fill")
+                    Text("Checked").fixedSize()
+                }
+                .padding(5)
+                .background(RoundedRectangle(cornerRadius: 5).fill(Color.blue))
+                .padding(10)
+            }
+        }
+
+        let view = MyView().background(Color.yellow)
+
+//        assertSnapshot(matching: view, as: .image(layout: .device(config: .watch), named: "device")
+        assertSnapshot(matching: view, as: .image(layout: .fixed(width: 200, height: 100)), named: "fixed")
+//        assertSnapshot(matching: view, as: .image(layout: .sizeThatFits, named: "size-that-fits")
     }
     #endif
 }
