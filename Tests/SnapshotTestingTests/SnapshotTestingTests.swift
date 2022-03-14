@@ -638,7 +638,11 @@ final class SnapshotTestingTests: XCTestCase {
 
     #if os(iOS)
     func testUIView() {
-        let view = UIButton(type: .contactAdd)
+        let view = UIView()
+        view.frame = .init(origin: .zero, size: .init(width: 20, height: 20))
+        view.backgroundColor = .cyan
+        view.layer.cornerRadius = 10
+
         assertSnapshot(matching: view, as: .image)
         assertSnapshot(matching: view, as: .recursiveDescription)
     }
