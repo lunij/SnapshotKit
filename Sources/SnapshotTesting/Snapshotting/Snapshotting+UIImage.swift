@@ -14,43 +14,59 @@ public extension Diffing where Value == UIImage {
     /// - Returns: A new diffing strategy.
     static func image(precision: Float, subpixelThreshold: UInt8, scale: CGFloat?) -> Diffing {
         let imageScale: CGFloat
-        if let scale = scale, scale != 0.0 {
+        if let scale = scale, scale != 0 {
             imageScale = scale
         } else {
             imageScale = UIScreen.main.scale
         }
 
         return Diffing(
-            toData: { $0.pngData() ?? emptyImage().pngData()! }, // swiftlint:disable:this force_unwrapping
+            toData: { $0.pngData() ?? .fallback! }, // swiftlint:disable:this force_unwrapping
             fromData: { UIImage(data: $0, scale: imageScale)! }, // swiftlint:disable:this force_unwrapping
             diff: { old, new in
-                guard !compare(old, new, precision: precision, subpixelThreshold: subpixelThreshold) else { return nil }
-                let difference = SnapshotTesting.diff(old, new)
-                let message = new.size == old.size
-                    ? "Newly-taken snapshot does not match reference."
-                    : "Newly-taken snapshot@\(new.size) does not match reference@\(old.size)."
-                let oldAttachment = XCTAttachment(image: old)
-                oldAttachment.name = "reference"
-                let newAttachment = XCTAttachment(image: new)
-                newAttachment.name = "failure"
-                let differenceAttachment = XCTAttachment(image: difference)
-                differenceAttachment.name = "difference"
-                return (
-                    message,
-                    [oldAttachment, newAttachment, differenceAttachment]
-                )
+                func attachments(_ old: UIImage, _ new: UIImage) -> [XCTAttachment] {
+                    [
+                        XCTAttachment(name: "expected", image: old),
+                        XCTAttachment(name: "actual", image: new),
+                        XCTAttachment(name: "difference", image: old.diff(to: new))
+                    ]
+                }
+
+                let result = old.compare(to: new, precision: precision, subpixelThreshold: subpixelThreshold)
+                switch result {
+                case .cgContextFailure, .cgContextDataFailure, .cgImageFailure:
+                    return ("Core Graphics failure", [])
+                case .isEqual, .isSimilar:
+                    return nil
+                case .isUnequal:
+                    return ("Snapshot is unequal", attachments(old, new))
+                case .isNotSimilar:
+                    return ("Snapshot is not similar", attachments(old, new))
+                case let .unequalWidth(lhs, rhs):
+                    return ("Snapshot width of \(rhs) is unequal to expected \(lhs)", attachments(old, new))
+                case let .unequalHeight(lhs, rhs):
+                    return ("Snapshot height of \(rhs) is unequal to expected \(lhs)", attachments(old, new))
+                }
             }
         )
     }
+}
 
-    /// Used when the image size has no width or no height to generated the default empty image
-    private static func emptyImage() -> UIImage {
+private extension Data {
+    static var fallback: Data? {
         let label = UILabel(frame: CGRect(x: 0, y: 0, width: 400, height: 80))
         label.backgroundColor = .red
         label.text = "Error: No image could be generated for this view as its size was zero. Please set an explicit size in the test."
         label.textAlignment = .center
         label.numberOfLines = 3
-        return label.asImage()
+        return label.asImage().pngData()
+    }
+}
+
+private extension XCTAttachment {
+    convenience init(name: String, image: UIImage) {
+        self.init(image: image)
+        self.name = name
     }
 }
 
@@ -78,75 +94,100 @@ let imageContextColorSpace = CGColorSpace(name: CGColorSpace.sRGB)
 let imageContextBitsPerComponent = 8
 let imageContextBytesPerPixel = 4
 
-// swiftlint:disable:next cyclomatic_complexity
-private func compare(_ old: UIImage, _ new: UIImage, precision: Float, subpixelThreshold: UInt8) -> Bool {
-    guard let oldCgImage = old.cgImage else { return false }
-    guard let newCgImage = new.cgImage else { return false }
-    guard oldCgImage.width != 0 else { return false }
-    guard newCgImage.width != 0 else { return false }
-    guard oldCgImage.width == newCgImage.width else { return false }
-    guard oldCgImage.height != 0 else { return false }
-    guard newCgImage.height != 0 else { return false }
-    guard oldCgImage.height == newCgImage.height else { return false }
+private enum ImageComparisonResult {
+    case cgContextDataFailure
+    case cgContextFailure
+    case cgImageFailure
+    case isEqual
+    case isNotSimilar
+    case isSimilar
+    case isUnequal
+    case unequalWidth(Int, Int)
+    case unequalHeight(Int, Int)
+}
 
-    let byteCount = imageContextBytesPerPixel * oldCgImage.width * oldCgImage.height
-    var oldBytes = [UInt8](repeating: 0, count: byteCount)
-    guard let oldContext = context(for: oldCgImage, data: &oldBytes) else { return false }
-    guard let oldData = oldContext.data else { return false }
-    if let newContext = context(for: newCgImage), let newData = newContext.data {
-        if memcmp(oldData, newData, byteCount) == 0 { return true }
-    }
-    let newer = UIImage(data: new.pngData()!)! // swiftlint:disable:this force_unwrapping
-    guard let newerCgImage = newer.cgImage else { return false }
-    var newerBytes = [UInt8](repeating: 0, count: byteCount)
-    guard let newerContext = context(for: newerCgImage, data: &newerBytes) else { return false }
-    guard let newerData = newerContext.data else { return false }
-    if memcmp(oldData, newerData, byteCount) == 0 { return true }
-    if precision >= 1, subpixelThreshold == 0 { return false }
-    var differentPixelCount = 0
-    let threshold = Int(round((1.0 - precision) * Float(byteCount)))
+private extension UIImage {
+    // swiftlint:disable:next cyclomatic_complexity
+    func compare(to other: UIImage, precision: Float, subpixelThreshold: UInt8) -> ImageComparisonResult {
+        guard let oldCgImage = cgImage, let newCgImage = other.cgImage else { return .cgImageFailure }
 
-    var byte = 0
-    while byte < byteCount {
-        if oldBytes[byte].diff(between: newerBytes[byte]) > subpixelThreshold {
-            differentPixelCount += 1
-            if differentPixelCount >= threshold {
-                return false
-            }
+        guard oldCgImage.width == newCgImage.width else {
+            return .unequalWidth(oldCgImage.width, newCgImage.width)
         }
-        byte += 1
+
+        guard oldCgImage.height == newCgImage.height else {
+            return .unequalHeight(oldCgImage.height, newCgImage.height)
+        }
+
+        let byteCount = imageContextBytesPerPixel * oldCgImage.width * oldCgImage.height
+        var oldBytes = [UInt8](repeating: 0, count: byteCount)
+        guard let oldContext = oldCgImage.cgContext(data: &oldBytes),
+              let newContext = newCgImage.cgContext()
+        else { return .cgContextFailure }
+
+        guard let oldData = oldContext.data, let newData = newContext.data else {
+            return .cgContextDataFailure
+        }
+
+        if memcmp(oldData, newData, byteCount) == 0 { return .isEqual }
+
+        let newer = UIImage(data: other.pngData()!)! // swiftlint:disable:this force_unwrapping
+
+        guard let newerCgImage = newer.cgImage else { return .cgImageFailure }
+        var newerBytes = [UInt8](repeating: 0, count: byteCount)
+        guard let newerContext = newerCgImage.cgContext(data: &newerBytes) else { return .cgContextFailure }
+        guard let newerData = newerContext.data else { return .cgContextDataFailure }
+
+        if memcmp(oldData, newerData, byteCount) == 0 { return .isEqual }
+        if precision >= 1, subpixelThreshold == 0 { return .isUnequal }
+
+        var differentPixelCount = 0
+        let threshold = Int(round((1.0 - precision) * Float(byteCount)))
+
+        var byte = 0
+        while byte < byteCount {
+            if oldBytes[byte].diff(between: newerBytes[byte]) > subpixelThreshold {
+                differentPixelCount += 1
+                if differentPixelCount >= threshold {
+                    return .isNotSimilar
+                }
+            }
+            byte += 1
+        }
+        return .isSimilar
     }
-    return true
+
+    func diff(to other: UIImage) -> UIImage {
+        let width = max(size.width, size.width)
+        let height = max(size.height, size.height)
+        let scale = max(scale, scale)
+        UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), true, scale)
+        other.draw(at: .zero)
+        draw(at: .zero, blendMode: .difference, alpha: 1)
+        let differenceImage = UIGraphicsGetImageFromCurrentImageContext()! // swiftlint:disable:this force_unwrapping
+        UIGraphicsEndImageContext()
+        return differenceImage
+    }
 }
 
-private func context(for cgImage: CGImage, data: UnsafeMutableRawPointer? = nil) -> CGContext? {
-    let bytesPerRow = cgImage.width * imageContextBytesPerPixel
-    guard
-        let colorSpace = imageContextColorSpace,
-        let context = CGContext(
-            data: data,
-            width: cgImage.width,
-            height: cgImage.height,
-            bitsPerComponent: imageContextBitsPerComponent,
-            bytesPerRow: bytesPerRow,
-            space: colorSpace,
-            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-        )
-    else { return nil }
+private extension CGImage {
+    func cgContext(data: UnsafeMutableRawPointer? = nil) -> CGContext? {
+        let bytesPerRow = width * imageContextBytesPerPixel
+        guard
+            let colorSpace = imageContextColorSpace,
+            let context = CGContext(
+                data: data,
+                width: width,
+                height: height,
+                bitsPerComponent: imageContextBitsPerComponent,
+                bytesPerRow: bytesPerRow,
+                space: colorSpace,
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            )
+        else { return nil }
 
-    context.draw(cgImage, in: CGRect(x: 0, y: 0, width: cgImage.width, height: cgImage.height))
-    return context
-}
-
-private func diff(_ old: UIImage, _ new: UIImage) -> UIImage {
-    let width = max(old.size.width, new.size.width)
-    let height = max(old.size.height, new.size.height)
-    let scale = max(old.scale, new.scale)
-    UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), true, scale)
-    new.draw(at: .zero)
-    old.draw(at: .zero, blendMode: .difference, alpha: 1)
-    let differenceImage = UIGraphicsGetImageFromCurrentImageContext()! // swiftlint:disable:this force_unwrapping
-    UIGraphicsEndImageContext()
-    return differenceImage
+        context.draw(self, in: CGRect(x: 0, y: 0, width: width, height: height))
+        return context
+    }
 }
 #endif
