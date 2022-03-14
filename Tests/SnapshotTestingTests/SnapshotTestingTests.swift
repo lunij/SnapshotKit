@@ -321,30 +321,6 @@ final class SnapshotTestingTests: XCTestCase {
     }
     #endif
 
-    #if os(iOS)
-    func testAssertMultipleSnapshot() {
-        class TableViewController: UITableViewController {
-            override func viewDidLoad() {
-                super.viewDidLoad()
-                tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
-            }
-
-            override func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
-                10
-            }
-
-            override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-                let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-                cell.textLabel?.text = "\(indexPath.row)"
-                return cell
-            }
-        }
-        let tableViewController = TableViewController()
-        assertSnapshots(matching: tableViewController, as: ["iPhoneSE-image": .image(on: .iPhoneSe), "iPad-image": .image(on: .iPadMini)])
-        assertSnapshots(matching: tableViewController, as: [.image(on: .iPhoneX), .image(on: .iPhoneXsMax)])
-    }
-    #endif
-
     #if os(iOS) || os(tvOS)
     func testTraits() {
         let viewController = TestViewController()
