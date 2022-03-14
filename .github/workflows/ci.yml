@@ -26,7 +26,9 @@ jobs:
       - name: Set DerivedData path
         run: defaults write com.apple.dt.Xcode IDECustomDerivedDataLocation .derivedData
       - name: Homebrew installations
-        run: brew install xcbeautify
+        run: brew install swiftformat xcbeautify
+      - name: Lint
+        run: make lint
       - name: Generate Xcode project
         run: make xcodeproj
       - name: Run tests on iOS

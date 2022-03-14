@@ -7,6 +7,10 @@ TEST_RESULTS_TVOS = "$(DERIVED_DATA_PATH)/TestResults_tvOS"
 xcodeproj:
 	PF_DEVELOP=1 swift run xcodegen
 
+lint:
+	swiftformat --swiftversion 5.5 --cache ignore --lint .
+	swiftlint --strict
+
 test-linux:
 	docker run \
 		--rm \
