@@ -895,8 +895,8 @@ class TestViewController: UIViewController {
 
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
         super.traitCollectionDidChange(previousTraitCollection)
-        self.view.setNeedsUpdateConstraints()
-        self.view.updateConstraintsIfNeeded()
+        view.setNeedsUpdateConstraints()
+        view.updateConstraintsIfNeeded()
     }
 }
 #endif

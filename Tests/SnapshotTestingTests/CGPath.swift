@@ -68,6 +68,7 @@ extension UIBezierPath {
         UIBezierPath(cgPath: .heart)
     }
 }
+
 #elseif os(macOS)
 extension NSBezierPath {
     /// Creates an approximation of a heart at a 45º angle with a circle above, using all available element types:
