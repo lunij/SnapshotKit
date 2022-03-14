@@ -944,11 +944,12 @@ final class SnapshotTestingTests: XCTestCase {
     @available(iOS 13.0, *)
     func testSwiftUIView_iOS() {
         let view = TestView().environment(\.colorScheme, .light)
+        let precision: Float = 0.99
 
-        assertSnapshot(matching: view, as: .image(traits: .init(userInterfaceStyle: .light)))
-        assertSnapshot(matching: view, as: .image(layout: .sizeThatFits, traits: .init(userInterfaceStyle: .light)), named: "size-that-fits")
-        assertSnapshot(matching: view, as: .image(layout: .fixed(width: 200, height: 100), traits: .init(userInterfaceStyle: .light)), named: "fixed")
-        assertSnapshot(matching: view, as: .image(layout: .device(config: .iPhoneSe), traits: .init(userInterfaceStyle: .light)), named: "device")
+        assertSnapshot(matching: view, as: .image(precision: precision, traits: .init(userInterfaceStyle: .light)))
+        assertSnapshot(matching: view, as: .image(precision: precision, layout: .sizeThatFits, traits: .init(userInterfaceStyle: .light)), named: "size-that-fits")
+        assertSnapshot(matching: view, as: .image(precision: precision, layout: .fixed(width: 200, height: 100), traits: .init(userInterfaceStyle: .light)), named: "fixed")
+        assertSnapshot(matching: view, as: .image(precision: precision, layout: .device(config: .iPhoneSe), traits: .init(userInterfaceStyle: .light)), named: "device")
     }
     #endif
 
