@@ -832,11 +832,12 @@ final class SnapshotTestingTests: XCTestCase {
     @available(tvOS 13.0, *)
     func testSwiftUIView_tvOS() {
         let view = TestView().environment(\.colorScheme, .light)
+        let precision: Float = 0.98
 
-        assertSnapshot(matching: view, as: .image())
-        assertSnapshot(matching: view, as: .image(layout: .sizeThatFits), named: "size-that-fits")
-        assertSnapshot(matching: view, as: .image(layout: .fixed(width: 300, height: 100)), named: "fixed")
-        assertSnapshot(matching: view, as: .image(layout: .device(config: .tv)), named: "device")
+        assertSnapshot(matching: view, as: .image(precision: precision))
+        assertSnapshot(matching: view, as: .image(precision: precision, layout: .sizeThatFits), named: "size-that-fits")
+        assertSnapshot(matching: view, as: .image(precision: precision, layout: .fixed(width: 300, height: 100)), named: "fixed")
+        assertSnapshot(matching: view, as: .image(precision: precision, layout: .device(config: .tv)), named: "device")
     }
     #endif
 }
