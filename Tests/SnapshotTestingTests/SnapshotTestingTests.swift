@@ -87,23 +87,6 @@ final class SnapshotTestingTests: XCTestCase {
         """)
     }
 
-    #if os(iOS)
-    func testAutolayout() {
-        let viewController = UIViewController()
-        viewController.view.translatesAutoresizingMaskIntoConstraints = false
-        let subview = UIView()
-        subview.translatesAutoresizingMaskIntoConstraints = false
-        viewController.view.addSubview(subview)
-        NSLayoutConstraint.activate([
-            subview.topAnchor.constraint(equalTo: viewController.view.topAnchor),
-            subview.bottomAnchor.constraint(equalTo: viewController.view.bottomAnchor),
-            subview.leftAnchor.constraint(equalTo: viewController.view.leftAnchor),
-            subview.rightAnchor.constraint(equalTo: viewController.view.rightAnchor)
-        ])
-        assertSnapshot(matching: viewController, as: .image)
-    }
-    #endif
-
     func testDeterministicDictionaryAndSetSnapshots() {
         struct Person: Hashable { let name: String }
         struct DictionarySetContainer { let dict: [String: Int], set: Set<Person> }
@@ -298,29 +281,6 @@ final class SnapshotTestingTests: XCTestCase {
     }
     #endif
 
-    #if os(iOS)
-    func testUITableViewController() {
-        class TableViewController: UITableViewController {
-            override func viewDidLoad() {
-                super.viewDidLoad()
-                tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
-            }
-
-            override func tableView(_: UITableView, numberOfRowsInSection _: Int) -> Int {
-                10
-            }
-
-            override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-                let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-                cell.textLabel?.text = "\(indexPath.row)"
-                return cell
-            }
-        }
-        let tableViewController = TableViewController()
-        assertSnapshot(matching: tableViewController, as: .image(on: .iPhoneSe))
-    }
-    #endif
-
     #if os(iOS) || os(tvOS)
     func testTraits() {
         let viewController = TestViewController()
@@ -475,9 +435,7 @@ final class SnapshotTestingTests: XCTestCase {
         assertSnapshot(matching: viewController, as: .image(on: .iPadPro11(.portrait), precision: precision), named: "ipad-pro-11-alternative")
         assertSnapshot(matching: viewController, as: .image(on: .iPadPro12_9(.portrait), precision: precision), named: "ipad-pro-12-9-alternative")
     }
-    #endif
 
-    #if os(iOS)
     func testCollectionViewsWithMultipleScreenSizes() {
         final class CollectionViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
             let flowLayout: UICollectionViewFlowLayout = {
@@ -552,9 +510,7 @@ final class SnapshotTestingTests: XCTestCase {
             "iphoneMax": .image(on: .iPhoneXsMax)
         ])
     }
-    #endif
 
-    #if os(iOS)
     func testTraitsWithView() {
         let label = UILabel()
         label.font = .preferredFont(forTextStyle: .title1)
@@ -594,25 +550,7 @@ final class SnapshotTestingTests: XCTestCase {
             )
         }
     }
-    #endif
 
-    #if os(iOS) || os(tvOS)
-    func testUIBezierPath() {
-        let path = UIBezierPath.heart
-
-        let osName: String
-        #if os(iOS)
-        osName = "iOS"
-        #elseif os(tvOS)
-        osName = "tvOS"
-        #endif
-
-        assertSnapshot(matching: path, as: .image, named: osName)
-        assertSnapshot(matching: path, as: .elementsDescription, named: osName)
-    }
-    #endif
-
-    #if os(iOS)
     func testUIView() {
         let view = UIView()
         view.frame = .init(origin: .zero, size: .init(width: 20, height: 20))
@@ -621,6 +559,25 @@ final class SnapshotTestingTests: XCTestCase {
 
         assertSnapshot(matching: view, as: .image)
         assertSnapshot(matching: view, as: .recursiveDescription)
+    }
+
+    func testUIViewController() {
+        let view = UIView()
+        view.backgroundColor = .cyan
+        view.layer.cornerRadius = 10
+        view.translatesAutoresizingMaskIntoConstraints = false
+
+        let viewController = UIViewController()
+        viewController.view.addSubview(view)
+
+        NSLayoutConstraint.activate([
+            view.topAnchor.constraint(equalTo: viewController.view.topAnchor),
+            view.bottomAnchor.constraint(equalTo: viewController.view.bottomAnchor),
+            view.leftAnchor.constraint(equalTo: viewController.view.leftAnchor),
+            view.rightAnchor.constraint(equalTo: viewController.view.rightAnchor)
+        ])
+
+        assertSnapshot(matching: viewController, as: .image(size: .init(width: 100, height: 100)))
     }
 
     func testUIViewControllerLifeCycle() {
@@ -741,6 +698,22 @@ final class SnapshotTestingTests: XCTestCase {
             UINavigationController(rootViewController: UIViewController())
         ]
         assertSnapshot(matching: tab, as: .hierarchy)
+    }
+    #endif
+
+    #if os(iOS) || os(tvOS)
+    func testUIBezierPath() {
+        let path = UIBezierPath.heart
+
+        let osName: String
+        #if os(iOS)
+        osName = "iOS"
+        #elseif os(tvOS)
+        osName = "tvOS"
+        #endif
+
+        assertSnapshot(matching: path, as: .image, named: osName)
+        assertSnapshot(matching: path, as: .elementsDescription, named: osName)
     }
     #endif
 
