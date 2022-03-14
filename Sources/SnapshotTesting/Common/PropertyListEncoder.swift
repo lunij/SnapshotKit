@@ -1126,6 +1126,7 @@ private struct _PlistKeyedDecodingContainer<K: CodingKey>: KeyedDecodingContaine
     }
 }
 
+// swiftlint:disable:next type_body_length
 private struct _PlistUnkeyedDecodingContainer: UnkeyedDecodingContainer {
     // MARK: Properties
 
