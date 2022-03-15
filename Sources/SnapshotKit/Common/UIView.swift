@@ -57,7 +57,7 @@ extension UIView {
         if config.safeArea == .zero { frame.origin = .init(x: offscreen, y: offscreen) }
 
         return (snapshot ?? Async { [self] callback in
-            addImagesForRenderedViews().sequence().run { views in
+            addImagesForRenderedViews().sequence().run { [self] views in
                 callback(
                     renderer(bounds: bounds, for: traits).image { ctx in
                         if drawHierarchyInKeyWindow {
