@@ -156,14 +156,15 @@ public func verifySnapshot<Value, Format>( // swiftlint:disable:this cyclomatic_
     matching value: @autoclosure () throws -> Value,
     as snapshotting: Snapshotting<Value, Format>,
     named name: String? = nil,
-    record recording: Bool = false,
+    record isInlineRecording: Bool = false,
     snapshotDirectory: String? = nil,
     timeout: TimeInterval = 5,
     file: StaticString = #file,
     testName: String = #function,
     line _: UInt = #line
 ) -> String? {
-    let recording = recording || isRecording
+    let isRecordingAll = ProcessInfo.processInfo.environment.keys.contains("RECORD_ALL")
+    let isRecording = isInlineRecording || isRecording || isRecordingAll
 
     do {
         let fileUrl = URL(fileURLWithPath: "\(file)", isDirectory: false)
@@ -223,9 +224,9 @@ public func verifySnapshot<Value, Format>( // swiftlint:disable:this cyclomatic_
             return "Couldn't snapshot value"
         }
 
-        guard !recording, fileManager.fileExists(atPath: snapshotFileUrl.path) else {
+        guard !isRecording, fileManager.fileExists(atPath: snapshotFileUrl.path) else {
             try snapshotting.diffing.toData(diffable).write(to: snapshotFileUrl)
-            return recording
+            return isRecording
                 ? """
                 Record mode is on. Turn record mode off and re-run "\(testName)" to test against the newly-recorded snapshot.
 
