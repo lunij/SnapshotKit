@@ -1,13 +1,9 @@
-# 📸 SnapshotKit
+# SnapshotKit
 
-[![Swift 5.4](https://img.shields.io/badge/swift-5.1-ED523F.svg?style=flat)](https://swift.org/download/)
-[![CI](https://github.com/pointfreeco/swift-snapshot-testing/workflows/CI/badge.svg)](https://actions-badge.atrox.dev/pointfreeco/swift-snapshot-testing/goto)
+[![Swift 5.4](https://img.shields.io/badge/swift-5.4-ED523F.svg?style=flat)](https://swift.org/download/)
+[![CI](https://github.com/lunij/SnapshotKit/workflows/CI/badge.svg)](https://actions-badge.atrox.dev/lunij/SnapshotKit/goto)
 
 Delightful Swift snapshot testing.
-
-<!--
-![An example of a snapshot failure in Xcode.](.github/snapshot-test-1.png)
--->
 
 ## Usage
 
@@ -212,15 +208,11 @@ end
 
 ## Related Tools
 
-    - [SnapshotTesting](https://github.com/pointfreeco/swift-snapshot-testing/) is the framework this one is based on.
+  - [SnapshotTesting](https://github.com/pointfreeco/swift-snapshot-testing/) is the framework this one is based on.
 
-    - [`iOSSnapshotTestCase`](https://github.com/uber/ios-snapshot-test-case/) helped introduce screen shot testing to a broad audience in the iOS community.
+  - [iOSSnapshotTestCase](https://github.com/uber/ios-snapshot-test-case/) helped introduce screen shot testing to a broad audience in the iOS community.
 
-    - [Jest](https://jestjs.io) brought generalized snapshot testing to the JavaScript community with a polished user experience. Several features of this library (diffing, automatically capturing new snapshots) were directly influenced.
-
-<a href="https://www.pointfree.co/episodes/ep41-a-tour-of-snapshot-testing">
-  <img alt="video poster image" src="https://d1hf1soyumxcgv.cloudfront.net/0041-tour-of-snapshot-testing/0041-poster.jpg" width="480">
-</a>
+  - [Jest](https://jestjs.io) brought generalized snapshot testing to the JavaScript community with a polished user experience. Several features of this library (diffing, automatically capturing new snapshots) were directly influenced.
 
 ## License
 
